@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONsulTayo SPCF Inc. | Integrated Telemedicine Portal</title>
+    <!-- Tailwind CSS for modern aesthetics -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for sleek medical & dashboard icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom styling & configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        clinical: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emeraldCustom: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .page-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Hide scrollbar for directory lists */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom print styling specifically for E-Prescriptions */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-rx-modal, #print-rx-modal * {
+                visibility: visible;
+            }
+            #print-rx-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+    /* Container to center the button and add space */
+.button-container {
+    text-align: center;      /* Centers the button horizontally */
+    margin: 40px 0;          /* Adds 40px space above and below */
+}
+
+/* The button styling */
+.nurses-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #28a745; /* A nice green color, change as needed */
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+/* Hover effect */
+.nurses-button:hover {
+    background-color: #218838;
+}
+.button-container {
+    text-align: center;      /* Centers the button horizontally */
+    margin: 40px 0;          /* Adds 40px space above and below */
+}
+
+/* The button styling */
+.ncp-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #28a745; /* A nice green color, change as needed */
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+/* Hover effect */
+.ncp-button:hover {
+    background-color: #218838;
+}
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col antialiased">
+
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center">
+                    <a href="#" onclick="navigateTo('landing')" class="flex items-center space-x-2">
+                        <div class="bg-clinical-600 text-white p-2 rounded-xl flex items-center justify-center shadow-md shadow-clinical-200">
+                            <i class="fa-solid fa-hospital text-xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-lg font-black tracking-tight text-slate-900 leading-none">CONsulTayo</span>
+                            <span class="text-[10px] font-bold tracking-widest text-clinical-600 uppercase">SPCF Inc.</span>
+                        </div>
+                        <span class="bg-clinical-100 text-clinical-800 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2">College of Nursing</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <button onclick="navigateTo('landing')" class="text-slate-600 hover:text-clinical-600 font-semibold text-sm transition-colors">Home</button>
+                    <button onclick="navigateTo('patient-dashboard')" class="text-slate-600 hover:text-clinical-600 font-semibold text-sm transition-colors">Patient Portal</button>
+                    <button onclick="navigateTo('booking-wizard')" class="bg-clinical-600 hover:bg-clinical-700 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-md shadow-clinical-100 transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <span>Book Appointment</span>
+                    </button>
+                    <div class="h-6 w-px bg-slate-200"></div>
+                    <!-- Doctor Switch Trigger -->
+                    <button onclick="handleDoctorPortalAccess()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-semibold text-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-user-doctor text-emeraldCustom-500"></i>
+                        <span>Nurse's Portal</span>
+                        <span id="nav-queue-count" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-1">0</span>
+                    </button>
+                    <button id="doc-logout-btn" onclick="logoutDoctor()" class="hidden text-rose-600 hover:text-rose-700 font-bold text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-power-off"></i>
+                        <span>Log Out</span>
+                    </button>
+                </div>
+
+                <!-- Mobile menu toggle -->
+                <div class="flex items-center md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-slate-600 hover:text-slate-900 focus:outline-none p-2 rounded-lg hover:bg-slate-100">
+                        <i class="fa-solid fa-bars text-xl" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Container -->
+        <div id="mobile-menu" class="hidden md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1">
+            <button onclick="navigateTo('landing'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 text-slate-600 font-medium rounded-lg hover:bg-slate-50 hover:text-clinical-600">Home</button>
+            <button onclick="navigateTo('patient-dashboard'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 text-slate-600 font-medium rounded-lg hover:bg-slate-50 hover:text-clinical-600">Patient Portal</button>
+            <button onclick="navigateTo('booking-wizard'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 bg-clinical-50 text-clinical-700 font-semibold rounded-lg hover:bg-clinical-100">Book Appointment</button>
+            <div class="border-t border-slate-100 my-2"></div>
+            <button onclick="handleDoctorPortalAccess(); toggleMobileMenu()" class="block w-full text-left px-3 py-2 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 flex items-center justify-between">
+                <span>Nurse's Portal</span>
+                <i class="fa-solid fa-user-doctor text-emeraldCustom-500"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- TOAST NOTIFICATION BOX -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 pointer-events-none space-y-2"></div>
+
+    <!-- MAIN BODY SECTIONS (SPA PAGE WRAPPERS) -->
+    <main class="flex-grow">
+
+        <!-- SECTION 1: LANDING PAGE -->
+        <section id="page-landing" class="page-transition block">
+            <!-- Hero banner with bg.jpeg background and high contrast styling -->
+            <div class="relative min-h-[550px] flex items-center bg-slate-900 bg-cover bg-center border-b border-slate-100 py-12 sm:py-24" style="background-image: linear-gradient(to right, rgba(15, 23, 42, 0.95) 40%, rgba(15, 23, 42, 0.75) 100%), url('bg.jpeg');">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                        <div class="lg:col-span-7 space-y-6">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-clinical-600/20 text-clinical-300 border border-clinical-600/30">
+                                <i class="fa-solid fa-graduation-cap mr-1.5 text-clinical-400"></i> CONsulTayo SPCF prototype
+                            </span>
+                            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-none">
+                                CONsulTayo SPCF <br><span class="text-clinical-400"> INC.</span>
+                            </h1>
+                            <p class="text-base sm:text-lg text-slate-300 font-normal max-w-xl">
+                                Welcome to CONsulTayo SPCF Incorporation telemedicine portal. We provide virtual healthcare services, medical intake scheduling, and electronic prescriptions in a unified academic sandbox.
+                            </p>
+                            <div class="flex flex-wrap gap-4 pt-2">
+                                <button onclick="navigateTo('booking-wizard')" class="bg-clinical-600 hover:bg-clinical-700 text-white px-6 py-3.5 rounded-xl font-bold text-base shadow-lg shadow-clinical-900/40 transition-all flex items-center space-x-2">
+                                    <span>Schedule a Consultation</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                                <button onclick="navigateTo('patient-dashboard')" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3.5 rounded-xl font-bold text-base transition-all flex items-center space-x-2">
+                                    <i class="fa-solid fa-hospital-user text-clinical-400"></i>
+                                    <span>Explore Patients Directory</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-6 pt-6 border-t border-slate-800 max-w-md">
+                                <div class="flex -space-x-2">
+                                    <div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-clinical-600 text-white flex items-center justify-center font-bold text-xs shadow">HS</div>
+                                    <div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-teal-600 text-white flex items-center justify-center font-bold text-xs shadow">ML</div>
+                                    <div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-pink-600 text-white flex items-center justify-center font-bold text-xs shadow">AC</div>
+                                    <div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow">MV</div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Virtual Ward Active</p>
+                                    <p class="text-xs text-slate-400">4 SPCF Clinical Specialists Simulated</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-5 relative">
+                            <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-clinical-600 to-emerald-500 opacity-20 blur-xl"></div>
+                            <!-- Mock UI Dashboard -->
+                            <div class="relative bg-slate-900/85 backdrop-blur-md border border-white/10 shadow-2xl rounded-2xl p-6 overflow-hidden">
+                                <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                                        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold text-slate-400">Active Consultation Stream</span>
+                                </div>
+                                <div class="bg-slate-800/80 rounded-xl p-4 mb-4 border border-white/5 flex items-center space-x-4">
+                                    <div class="p-3 bg-clinical-500/10 text-clinical-400 rounded-lg text-lg">
+                                        <i class="fa-solid fa-heart-pulse"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <h4 class="font-extrabold text-xs text-white">Sandbox Environment</h4>
+                                        <p class="text-[11px] text-slate-400">Includes history parameters, allergies, and diagnostics.</p>
+                                    </div>
+                                    <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold">Online</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-slate-400">Multi-Profile Database</span>
+                                        <span class="text-emeraldCustom-500 font-bold"><i class="fa-solid fa-circle-check"></i> Instantiated</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-slate-400">E-Prescription (Rx) Signatures</span>
+                                        <span class="text-emeraldCustom-500 font-bold"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-slate-400">Intake Demographics Forms</span>
+                                        <span class="text-emeraldCustom-500 font-bold"><i class="fa-solid fa-circle-check"></i> Connected</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Showcase -->
+            <div class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-extrabold text-center text-slate-900 mb-10">SPCF Care Integration Pillars</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                        <div class="p-3 bg-clinical-50 text-clinical-600 rounded-xl w-fit mb-4">
+                            <i class="fa-solid fa-address-book text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-900 mb-2">Accounts</h3>
+                        <p class="text-sm text-slate-600">Simulate diverse diagnostics right out-of-the-box! Switch between profiles such as Asthmatic youth, Hypothyroid elderly, Diabetic adults, and instantly audit their custom records.</p>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                        <div class="p-3 bg-teal-50 text-teal-600 rounded-xl w-fit mb-4">
+                            <i class="fa-solid fa-notes-medical text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-900 mb-2">Detailed Dynamic Forms</h3>
+                        <p class="text-sm text-slate-600">Robust data models capture Present/Past Illness records (HPI & PMH), allergies, active checklists, and symptom severity sliders. It even allows registration of custom patients.</p>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                        <div class="p-3 bg-emerald-50 text-emeraldCustom-500 rounded-xl w-fit mb-4">
+                            <i class="fa-solid fa-file-prescription text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-900 mb-2">Physician Workstation & Rx</h3>
+                        <p class="text-sm text-slate-600">Simulates real physician actions: review patient diagnostic intake folders, formulate clinical evaluations, digitally sign, and print out standardized E-prescriptions.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MULTI-STEP APPOINTMENT BOOKING WIZARD -->
+        <section id="page-booking-wizard" class="page-transition hidden max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div class="bg-white shadow-xl rounded-2xl border border-slate-200 overflow-hidden">
+                <!-- Wizard Header & Progress Bar -->
+                <div class="bg-slate-900 text-white p-6 sm:p-8">
+                    <div class="flex justify-between items-start flex-wrap gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold flex items-center space-x-2">
+                                <i class="fa-solid fa-calendar-check text-clinical-500"></i>
+                                <span>SPCF Clinical Intake Portal</span>
+                            </h2>
+                            <p class="text-slate-400 text-xs sm:text-sm mt-1">Submit complete physical assessment parameters to book your specialist stream.</p>
+                        </div>
+                        
+                        <!-- Profile Autofill Helper -->
+                        <div class="bg-slate-800 border border-slate-700 p-2 rounded-xl text-xs flex items-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-clinical-400"></i>
+                            <div>
+                                <span class="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">Demographic Autofill</span>
+                                <select id="autofill-profile-select" onchange="triggerWizardAutofill()" class="bg-slate-900 text-slate-200 border border-slate-700 text-xs rounded p-1 font-semibold focus:outline-none">
+                                    <option value="">-- Choose Profile --</option>
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Tracker UI -->
+                    <div class="mt-8 relative">
+                        <div class="h-1 bg-slate-700 rounded-full w-full absolute top-1/2 -translate-y-1/2 z-0"></div>
+                        <div id="wizard-progress-bar" class="h-1 bg-clinical-500 rounded-full absolute top-1/2 -translate-y-1/2 z-0 transition-all duration-300" style="width: 25%"></div>
+                        
+                        <div class="relative z-10 flex justify-between">
+                            <!-- Step 1 Indicator -->
+                            <div class="flex flex-col items-center">
+                                <div id="indicator-step1" class="w-8 h-8 rounded-full bg-clinical-600 text-white flex items-center justify-center font-bold text-sm ring-4 ring-slate-900 transition-all">1</div>
+                                <span class="text-[10px] sm:text-xs font-medium text-slate-300 mt-2">Consultation</span>
+                            </div>
+                            <!-- Step 2 Indicator -->
+                            <div class="flex flex-col items-center">
+                                <div id="indicator-step2" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm ring-4 ring-slate-900 transition-all">2</div>
+                                <span class="text-[10px] sm:text-xs font-medium text-slate-400 mt-2">Demographics</span>
+                            </div>
+                            <!-- Step 3 Indicator -->
+                            <div class="flex flex-col items-center">
+                                <div id="indicator-step3" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm ring-4 ring-slate-900 transition-all">3</div>
+                                <span class="text-[10px] sm:text-xs font-medium text-slate-400 mt-2">Medical History</span>
+                            </div>
+                            <!-- Step 4 Indicator -->
+                            <div class="flex flex-col items-center">
+                                <div id="indicator-step4" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm ring-4 ring-slate-900 transition-all">4</div>
+                                <span class="text-[10px] sm:text-xs font-medium text-slate-400 mt-2">Symptoms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wizard Form Content -->
+                <form id="booking-intake-form" onsubmit="handleFormSubmission(event)" class="p-6 sm:p-8 space-y-6">
+                    
+                    <!-- STEP 1: CONSULTATION & SCHEDULING DETAILS -->
+                    <div id="step-content-1" class="space-y-6">
+                        <div class="border-b border-slate-100 pb-4 mb-4">
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-2 h-5 bg-clinical-600 rounded-sm"></span>
+                                <span>1. Select Specialty & Schedule Slot</span>
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Clinical Department / Specialty <span class="text-red-500">*</span></label>
+                                <select id="form-specialty" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                                    <option value="" disabled selected>-- Choose Clinical Specialty --</option>
+                                    <option value="General Medicine">General Family Medicine</option>
+                                    <option value="Pediatrics">Pediatrics (Children's Health)</option>
+                                    <option value="Cardiology">Cardiology (Heart Health)</option>
+                                    <option value="Dermatology">Dermatology (Skin Specialist)</option>
+                                    <option value="Pulmonology">Pulmonology (Respiratory & Lung)</option>
+                                    <option value="Neurology">Neurology (Nervous System)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Preferred Consultant Physician <span class="text-red-500">*</span></label>
+                                <select id="form-doctor" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                                    <option value="" disabled selected>-- Select Doctors --</option>
+                                    <option value="Dr. Helena Santos, MD">Dr. Helena Santos, MD (Primary Internal Care)</option>
+                                    <option value="Dr. Mateo Lim, MD">Dr. Mateo Lim, MD (Cardiology Associate)</option>
+                                    <option value="Dr. Alicia Cruz, MD">Dr. Alicia Cruz, MD (Pediatric Specialist)</option>
+                                    <option value="Dr. Marcus Vance, MD">Dr. Marcus Vance, MD (Respiratory Specialist)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Appointment Date <span class="text-red-500">*</span></label>
+                                <input type="date" id="form-date" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Preferred Time Slot <span class="text-red-500">*</span></label>
+                                <select id="form-time" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                                    <option value="" disabled selected>-- Choose Time slot --</option>
+                                    <option value="09:00 AM - 09:30 AM">09:00 AM - 09:30 AM (Morning Slot)</option>
+                                    <option value="10:30 AM - 11:00 AM">10:30 AM - 11:00 AM (Morning Slot)</option>
+                                    <option value="02:00 PM - 02:30 PM">02:00 PM - 02:30 PM (Afternoon Slot)</option>
+                                    <option value="03:30 PM - 04:00 PM">03:30 PM - 04:00 PM (Afternoon Slot)</option>
+                                    <option value="05:00 PM - 05:30 PM">05:00 PM - 05:30 PM (Evening Slot)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: DEMOGRAPHICS -->
+                    <div id="step-content-2" class="space-y-6 hidden">
+                        <div class="border-b border-slate-100 pb-4 mb-4">
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-2 h-5 bg-clinical-600 rounded-sm"></span>
+                                <span>2. Demographics & Contact Records</span>
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Full Legal Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="form-name" placeholder="Full Legal Name" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Biological Sex <span class="text-red-500">*</span></label>
+                                <select id="form-sex" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Intersex">Intersex</option>
+                                    <option value="Prefer Not to Say">Prefer Not to Say</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Date of Birth <span class="text-red-500">*</span></label>
+                                <input type="date" id="form-dob" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Phone Number <span class="text-red-500">*</span></label>
+                                <input type="tel" id="form-phone" placeholder="+1 (555) 019-2834" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address <span class="text-red-500">*</span></label>
+                                <input type="email" id="form-email" placeholder="email@address.com" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Emergency Contact Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="form-emergency-name" placeholder="Emergency Contact Name" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Emergency Contact Phone <span class="text-red-500">*</span></label>
+                                <input type="tel" id="form-emergency-phone" placeholder="+1 (555) 019-9988" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: MEDICAL HISTORY -->
+                    <div id="step-content-3" class="space-y-6 hidden">
+                        <div class="border-b border-slate-100 pb-4 mb-4">
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-2 h-5 bg-clinical-600 rounded-sm"></span>
+                                <span>3. History of Present & Past Illness</span>
+                            </h3>
+                        </div>
+                        
+                        <!-- History of Present Illness (HPI) -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-slate-700">Reason for Consultation (History of Present Illness) <span class="text-red-500">*</span></label>
+                            <span class="text-xs text-slate-500 block">Briefly describe the timeline and details of your primary clinical complaint.</span>
+                            <textarea id="form-hpi" rows="3" required placeholder="e.g. For past 3 days I have been having constant mild dry coughs alongside intermittent chest pressure when waking up..." class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium"></textarea>
+                        </div>
+
+                        <!-- Past Medical History Checklist (PMH) -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">Do you have a past history of any of the following? (Check all that apply)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all">
+                                    <input type="checkbox" name="past-illness" value="Hypertension" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span class="text-xs font-semibold text-slate-700">Hypertension</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all">
+                                    <input type="checkbox" name="past-illness" value="Diabetes" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span class="text-xs font-semibold text-slate-700">Diabetes Mellitus</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all">
+                                    <input type="checkbox" name="past-illness" value="Asthma" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span class="text-xs font-semibold text-slate-700">Asthma / COPD</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all">
+                                    <input type="checkbox" name="past-illness" value="Kidney Disease" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span class="text-xs font-semibold text-slate-700">Kidney Disorders</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all">
+                                    <input type="checkbox" name="past-illness" value="Heart Attack" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span class="text-xs font-semibold text-slate-700">Cardiac Disease</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all">
+                                    <input type="checkbox" name="past-illness" value="Thyroid Disorder" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span class="text-xs font-semibold text-slate-700">Thyroid Disorder</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Allergies & Medications -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Drug or Food Allergies <span class="text-red-500">*</span></label>
+                                <input type="text" id="form-allergies" placeholder="e.g. Penicillin, Peanuts, None" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Current Active Medications</label>
+                                <input type="text" id="form-medications" placeholder="e.g. Lisinopril 10mg QD, None" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: SIGNS & SYMPTOMS -->
+                    <div id="step-content-4" class="space-y-6 hidden">
+                        <div class="border-b border-slate-100 pb-4 mb-4">
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-2 h-5 bg-clinical-600 rounded-sm"></span>
+                                <span>4. Active Signs & Symptoms Checklist</span>
+                            </h3>
+                        </div>
+
+                        <!-- Checklist options -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">Which symptoms are you currently experiencing?</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Fever" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Fever / Chills</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Dry Cough" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Dry Cough</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Shortness of Breath" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Dyspnea (Short of Breath)</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Headache" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Headache</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Fatigue" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Fatigue / Weakness</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Muscle Ache" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Muscle Ache (Myalgia)</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Nausea" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Nausea / Vomiting</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="symptom-check" value="Sore Throat" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                    <span>Sore Throat</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Symptom Pain Index Slider -->
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-semibold text-slate-700">Symptom Severity Index (Pain/Discomfort Scale)</label>
+                                <span id="severity-display" class="bg-amber-100 text-amber-800 text-xs font-extrabold px-3 py-1 rounded-full border border-amber-200">Scale: 5 / 10 (Moderate)</span>
+                            </div>
+                            <input type="range" id="form-severity" min="1" max="10" value="5" oninput="updateSeverityScale(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-clinical-600">
+                            <div class="flex justify-between text-[10px] text-slate-400 font-bold px-1">
+                                <span>1 (Barely Noticeable)</span>
+                                <span>5 (Moderate discomfort)</span>
+                                <span>10 (Severe / Intolerable)</span>
+                            </div>
+                        </div>
+
+                        <!-- Duration -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Duration of symptoms</label>
+                            <select id="form-duration" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                                <option value="Less than 24 Hours">Less than 24 Hours</option>
+                                <option value="1 to 3 Days">1 to 3 Days</option>
+                                <option value="4 to 7 Days">4 to 7 Days</option>
+                                <option value="1 to 2 Weeks">1 to 2 Weeks</option>
+                                <option value="More than 2 Weeks">More than 2 Weeks (Chronic)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- STEP STEPPING NAVIGATION ACTIONS -->
+                    <div class="flex justify-between pt-6 border-t border-slate-100">
+                        <button type="button" id="prev-step-btn" onclick="wizardStep(-1)" class="invisible bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-3 rounded-xl text-sm transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Back</span>
+                        </button>
+                        <button type="button" id="next-step-btn" onclick="wizardStep(1)" class="bg-clinical-600 hover:bg-clinical-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md transition-all flex items-center space-x-2">
+                            <span>Next Step</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" id="submit-step-btn" class="hidden bg-emeraldCustom-500 hover:bg-emeraldCustom-600 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Submit Booking & Records</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECTION 3: PATIENT PORTAL & DASHBOARD -->
+        <section id="page-patient-dashboard" class="page-transition hidden max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Health Records Dashboard</h1>
+                    <p class="text-sm text-slate-500 mt-1 font-medium">Audit active SPCF clinical profiles, schedule tele-consultations, and track electronic Rx slips.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="openRegisterModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Register New Patient</span>
+                    </button>
+                    <button onclick="navigateTo('booking-wizard')" class="bg-clinical-600 hover:bg-clinical-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <span>Schedule Appointment</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Horizontal Profiles bar -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 mb-8 shadow-sm">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-users text-clinical-600"></i>
+                        <span>SPCF Registered Patient Directory (Select to inspect record files)</span>
+                    </span>
+                    <span class="bg-clinical-100 text-clinical-800 text-[10px] px-2 py-0.5 rounded-full font-extrabold" id="total-patients-badge">10 Profiles</span>
+                </div>
+                <!-- Profiles Container with horizontal scroll -->
+                <div id="patient-profiles-list" class="flex space-x-3 overflow-x-auto py-2 no-scrollbar">
+                    <!-- Dynamic Profiles loaded here -->
+                </div>
+            </div>
+
+            <!-- Health Portal Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Sidebar Patient Demographics Summary Card -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center space-x-4 pb-6 border-b border-slate-100">
+                            <div class="w-14 h-14 rounded-2xl bg-clinical-100 text-clinical-600 flex items-center justify-center text-xl font-bold" id="patient-avatar-box">
+                                JD
+                            </div>
+                            <div>
+                                <h3 id="dash-patient-name" class="font-bold text-lg text-slate-900">Johnathan Doe</h3>
+                                <span class="bg-emeraldCustom-500/10 text-emeraldCustom-700 text-[10px] px-2.5 py-1 rounded-md font-bold" id="dash-patient-status">Active Profile</span>
+                            </div>
+                        </div>
+                        <div class="pt-6 space-y-4">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Demographic Profile</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Biological Sex:</span>
+                                    <span id="dash-patient-sex" class="font-semibold text-slate-800">Male</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Date of Birth:</span>
+                                    <span id="dash-patient-dob" class="font-semibold text-slate-800">1998-08-14</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Phone Contact:</span>
+                                    <span id="dash-patient-phone" class="font-semibold text-slate-800">+1 (555) 304-9921</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Email Address:</span>
+                                    <span id="dash-patient-email" class="font-semibold text-slate-800">johnathan@doe.com</span>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100 pt-4 space-y-2">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Past Medical History Summary</h4>
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-slate-500">Known Allergies:</span>
+                                        <span id="dash-patient-allergies" class="font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded text-[10px]">Penicillin</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 text-xs">
+                                        <span class="text-slate-500">Past Diagnoses:</span>
+                                        <div id="dash-patient-pmh-list" class="flex flex-wrap gap-1 mt-1">
+                                            <!-- Chronics list -->
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-1 text-xs pt-1">
+                                        <span class="text-slate-500">Active Medications:</span>
+                                        <span id="dash-patient-meds" class="font-semibold text-slate-700 bg-slate-100 p-1.5 rounded text-[10px] mt-1">Lisinopril 10mg QD</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100 pt-4 space-y-2">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Emergency Contact</h4>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Contact:</span>
+                                    <span id="dash-patient-em-name" class="font-semibold text-slate-800">Sarah Doe</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Emergency Phone:</span>
+                                    <span id="dash-patient-em-phone" class="font-semibold text-slate-800">+1 (555) 304-9900</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Alert Checklist Info -->
+                    <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-sm space-y-3 relative overflow-hidden">
+                        <div class="absolute -right-12 -bottom-12 opacity-10">
+                            <i class="fa-solid fa-laptop-medical text-9xl"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-clinical-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Academic Instructions</span>
+                        </h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Simulate the entire lifecycle! Click different patients from the directory to review details, view and print matching E-prescriptions. Register a new patient (marked as <span class="text-amber-400 font-bold">Pending</span>), then log in as a Doctor to diagnose and prescribe medications.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Main Content Panel (Consultations, Follow-Ups & E-Prescriptions) -->
+                <div class="lg:col-span-8 space-y-8">
+                    <!-- Consultations Queue Card -->
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                            <h3 class="font-bold text-lg text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-hospital-user text-clinical-600"></i>
+                                <span>Recent Clinical Consultations</span>
+                            </h3>
+                            <span id="consult-counter" class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-full font-bold">0 Active</span>
+                        </div>
+                        <div class="divide-y divide-slate-100" id="consultation-list-container">
+                            <!-- Dynamically Generated -->
+                        </div>
+                    </div>
+
+                    <!-- Face-to-Face Follow-Ups Card -->
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden hidden" id="f2f-followup-card">
+                        <div class="p-6 border-b border-slate-100 bg-teal-50/50">
+                            <h3 class="font-bold text-lg text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-hospital text-teal-600"></i>
+                                <span>Scheduled Face-to-Face Follow-up</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1">In-person clinical evaluations scheduled by your attending physician.</p>
+                        </div>
+                        <div class="p-6 space-y-4" id="f2f-details-body">
+                            <!-- Populated dynamically if F2F is active -->
+                        </div>
+                    </div>
+
+                    <!-- E-Prescriptions Records -->
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-6 border-b border-slate-100">
+                            <h3 class="font-bold text-lg text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-prescription text-emeraldCustom-500"></i>
+                                <span>Verified Electronic Prescriptions (Rx)</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1">Official pharmaceutical scripts authorized by consulting telemedicine physicians.</p>
+                        </div>
+                        <div class="divide-y divide-slate-100" id="prescription-list-container">
+                            <!-- Dynamically Generated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: SIMULATED DOCTOR DASHBOARD -->
+        <section id="page-doctor-dashboard" class="page-transition hidden max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 sm:p-8 text-white mb-8 shadow-lg relative overflow-hidden">
+                <div class="absolute right-0 top-0 h-full w-1/3 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-clinical-600 via-emerald-600 to-transparent"></div>
+                <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 mb-2 border border-emerald-500/30">
+                            <i class="fa-solid fa-stethoscope mr-1"></i> Active Doctor Session
+                        </span>
+                        <h1 class="text-3xl font-extrabold tracking-tight">Physician Portal & Clinical Queue</h1>
+                        <p class="text-sm text-slate-300 mt-1">Review incoming patient intake files, diagnostic summaries, write e-prescriptions, and schedule in-person followups.</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center space-x-3">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Practitioner</p>
+                            <p class="text-sm font-bold text-slate-100" id="doctor-logged-in-name">Dr. Helena Santos, MD</p>
+                        </div>
+                        <button onclick="logoutDoctor()" class="text-xs bg-rose-600/30 text-rose-300 border border-rose-500/30 py-1.5 px-3 rounded-lg font-bold hover:bg-rose-600 hover:text-white transition-colors">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctor Queue Panels -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Patient Intake List Queue -->
+                <div class="lg:col-span-5 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[650px]">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Pending Consultation Queue</h3>
+                        <span id="doc-queue-badge" class="bg-clinical-100 text-clinical-800 text-xs px-2.5 py-1 rounded-full font-bold">0 Pending</span>
+                    </div>
+                    <div class="flex-grow overflow-y-auto divide-y divide-slate-100" id="doctor-queue-container">
+                        <!-- Dynamically filled with bookings waiting for prescription/review -->
+                    </div>
+                </div>
+
+                <!-- Dynamic Medical Record Reviewer and Prescription Writer -->
+                <div class="lg:col-span-7 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[650px]" id="clinical-workplace">
+                    <!-- Default State -->
+                    <div id="workplace-empty-state" class="flex flex-col items-center justify-center h-full p-8 text-center space-y-4">
+                        <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">No Patient File Selected</h4>
+                            <p class="text-sm text-slate-400 max-w-xs mx-auto mt-1">Select an active patient booking from the queue to review history, symptoms, formulate diagnosis, and generate E-Prescriptions.</p>
+                        </div>
+                    </div>
+
+                    <!-- Active Assessment Workplace -->
+                    <div id="workplace-active-state" class="hidden flex flex-col h-full">
+                        <!-- Workplace Header -->
+                        <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <div>
+                                <span class="text-[10px] text-clinical-600 font-extrabold uppercase tracking-wider">Clinical Assessment File</span>
+                                <h3 id="workplace-patient-name" class="font-bold text-lg text-slate-900 font-sans">Patient Name</h3>
+                            </div>
+                            <span id="workplace-booking-date" class="text-xs bg-slate-200 text-slate-700 px-3 py-1 rounded-full font-semibold">Today</span>
+                        </div>
+
+                        <!-- Workplace Scrollable Reviewer Content -->
+                        <div class="flex-grow overflow-y-auto p-6 space-y-6">
+                            
+                            <!-- Tab Content 1: Demographic Summary -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-address-book"></i> Demographics</h4>
+                                <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-xs">
+                                    <p class="text-slate-500">Biological Sex: <span id="work-sex" class="font-semibold text-slate-800">-</span></p>
+                                    <p class="text-slate-500">Date of Birth: <span id="work-dob" class="font-semibold text-slate-800">-</span></p>
+                                    <p class="text-slate-500">Phone: <span id="work-phone" class="font-semibold text-slate-800">-</span></p>
+                                    <p class="text-slate-500">Email: <span id="work-email" class="font-semibold text-slate-800">-</span></p>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content 2: History of present/past illness & symptoms -->
+                            <div class="space-y-4">
+                                <h4 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">Medical Intake Assessment</h4>
+                                
+                                <div class="space-y-1">
+                                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">History of Present Illness (HPI)</span>
+                                    <p id="work-hpi" class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200 italic">Lorem ipsum dolor...</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Past Chronic History (PMH)</span>
+                                        <div id="work-pmh" class="text-xs text-slate-700 flex flex-wrap gap-1.5">
+                                            <!-- List -->
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Allergies & Drugs</span>
+                                        <p id="work-allergies" class="text-xs text-red-600 bg-red-50 border border-red-100 font-bold p-2 rounded-lg">Allergy details</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-sky-50 border border-sky-100 rounded-xl p-4 space-y-3">
+                                    <h5 class="text-xs font-bold text-sky-800 uppercase tracking-wider">Reported Signs & Symptoms</h5>
+                                    <div class="flex flex-wrap gap-1.5" id="work-symptoms">
+                                        <!-- badges -->
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-slate-500">Severity Metric:</span>
+                                        <span id="work-severity-badge" class="bg-rose-100 text-rose-800 font-bold px-2.5 py-0.5 rounded-full text-[10px]">7/10</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Prescription Authoring Form -->
+                            <div class="border-t border-slate-200 pt-6 space-y-4">
+                                <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                    <i class="fa-solid fa-file-prescription text-emeraldCustom-500"></i>
+                                    <span>Formulate Medical Prescription (Rx)</span>
+                                </h4>
+
+                                <!-- Diagnosis Input -->
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nurse's Diagnostis (As instructed by Physician.) <span class="text-red-500">*</span></label>
+                                    <input type="text" id="pres-diagnosis" placeholder="e.g. Acute Bronchitis secondary to viral infection" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                                </div>
+
+                                <!-- Medication Grid -->
+                                <div class="space-y-3">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Medications List (Rx)</label>
+                                    <div id="rx-medications-builder" class="space-y-2">
+                                        <!-- Standard Medicine Row 1 -->
+                                        <div class="grid grid-cols-12 gap-2 item-row">
+                                            <input type="text" placeholder="Drug (e.g., Amoxicillin 500mg)" class="col-span-6 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-name">
+                                            <input type="text" placeholder="Freq (e.g., Q8H)" class="col-span-3 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-freq">
+                                            <input type="text" placeholder="Dur (e.g., 7 Days)" class="col-span-3 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-dur">
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="addMedicationRow()" class="text-xs text-clinical-600 hover:text-clinical-700 font-bold flex items-center space-x-1">
+                                        <i class="fa-solid fa-plus-circle"></i>
+                                        <span>Add Another Medication Row</span>
+                                    </button>
+                                </div>
+
+                                <!-- Face to Face Option Integration -->
+                                <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 space-y-3">
+                                    <label class="flex items-center space-x-2 font-bold text-xs text-teal-800 uppercase tracking-wider cursor-pointer">
+                                        <input type="checkbox" id="work-require-f2f" class="h-4 w-4 text-teal-600 rounded border-teal-300 focus:ring-teal-500">
+                                        <span>Schedule Follow-up Face-to-Face Consultation?</span>
+                                    </label>
+                                    <div id="work-f2f-fields" class="hidden grid grid-cols-2 gap-4 pt-2">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Consultation Date</label>
+                                            <input type="date" id="work-f2f-date" class="w-full mt-1 rounded-lg border-slate-200 bg-white border p-2 text-xs">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Room / Clinic Area</label>
+                                            <input type="text" id="work-f2f-room" placeholder="e.g. Room 302, Clinical Wing A" class="w-full mt-1 rounded-lg border-slate-200 bg-white border p-2 text-xs">
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Follow-up Preparation Instructions</label>
+                                            <input type="text" id="work-f2f-notes" placeholder="e.g. Fasting for 8 hours required before arrival for blood work." class="w-full mt-1 rounded-lg border-slate-200 bg-white border p-2 text-xs">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Doctor Signature Stamp Simulated -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Attending Practitioner</label>
+                                        <input type="text" id="pres-doc-name" value="Dr. Helena Santos, MD" disabled class="w-full rounded-lg border-slate-200 bg-slate-100 border p-2 text-xs font-semibold text-slate-600">
+                                    </div>
+                                   <div>
+    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        Digital Signature/Stamp
+    </label>
+
+    <select id="pres-signature-style"
+        class="w-full rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-clinical-600 text-slate-700">
+
+        <option value="S_ARTEZUELA">Artezuela, Shanly RN (Digital Signature Block)</option>
+        <option value="S_CANYANAN">Cayanan, Shaianne Jade RN (Digital Signature Block)</option>
+        <option value="F_DIZON">Dizon, Francois Niko RN (Digital Signature Block)</option>
+        <option value="G_GARCIA">Garcia, Genesis RN (Digital Signature Block)</option>
+        <option value="A_LEGASPI">Legaspi, Adrian RN (Digital Signature Block)</option>
+        <option value="C_OCAMPO">Ocampo, Chlouie RN (Digital Signature Block)</option>
+        <option value="M_SALTA">Salta, Mariella Dimple RN (Digital Signature Block)</option>
+        <option value="A_STA_TERESA">Sta Teresa, Aeira Lei RN (Digital Signature Block)</option>
+        <option value="I_UDEH">Udeh, Ifunanya Esther RN (Digital Signature Block)</option>
+
+    </select>
+</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Workplace Footer Controls -->
+                        <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end space-x-3">
+                            <button onclick="closeWorkplace()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-all">Cancel Assessment</button>
+                            <button onclick="submitEPrescription()" class="px-5 py-2 bg-emeraldCustom-500 hover:bg-emeraldCustom-600 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center space-x-1">
+                                <i class="fa-solid fa-file-signature"></i>
+                                <span>Sign & Issue Clinical Form</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- OVERLAY MODAL: DOCTOR PORTAL ACCESS LOG IN -->
+    <div id="doctor-login-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <span class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-shield text-clinical-600"></i>
+                    <span>SPCF Practitioner Verification Gateway</span>
+                </span>
+                <button onclick="closeDoctorLoginModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="bg-slate-50 border border-slate-100 p-3.5 rounded-xl text-xs text-slate-600 space-y-1">
+                    <p class="font-extrabold text-slate-800"><i class="fa-solid fa-key mr-1 text-clinical-600"></i> Sandbox Credentials</p>
+                    <p>Enter these exact clinical credentials to log in:</p>
+                    <p>Username: <strong class="text-clinical-700 select-all font-mono">nurses@spcf.edu.ph</strong></p>
+                    <p>Password: <strong class="text-clinical-700 select-all font-mono">spcf2026</strong></p>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Email / Username</label>
+                        <input type="email" id="login-username" placeholder="nurses@spcf.edu.ph" class="w-full rounded-xl border-slate-200 border p-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-clinical-600">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Passphrase</label>
+                        <input type="password" id="login-password" placeholder="••••••••" class="w-full rounded-xl border-slate-200 border p-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-clinical-600">
+                    </div>
+                </div>
+                <button onclick="attemptDoctorLogin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md mt-2 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-lock-open text-emeraldCustom-500"></i>
+                    <span>Authenticate Session</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY MODAL: REGISTER NEW PATIENT FORM -->
+    <div id="register-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <span class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus text-clinical-600"></i>
+                    <span>Register New Medical Patient Profile</span>
+                </span>
+                <button onclick="closeRegisterModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="patient-registration-form" onsubmit="saveRegisteredPatient(event)" class="p-6 overflow-y-auto space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Legal Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="reg-name" required placeholder="e.g. Eleanor Vance" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Biological Sex <span class="text-red-500">*</span></label>
+                        <select id="reg-sex" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Intersex">Intersex</option>
+                            <option value="Prefer Not to Say">Prefer Not to Say</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Date of Birth <span class="text-red-500">*</span></label>
+                        <input type="date" id="reg-dob" required class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phone Contact <span class="text-red-500">*</span></label>
+                        <input type="tel" id="reg-phone" required placeholder="+1 (555) 902-1824" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address <span class="text-red-500">*</span></label>
+                        <input type="email" id="reg-email" required placeholder="eleanor.vance@example.com" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-6 space-y-4">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Clinical Intake Baseline</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Drug / Food Allergies <span class="text-red-500">*</span></label>
+                            <input type="text" id="reg-allergies" required placeholder="e.g. Penicillin, Soy, None" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Active Maintenance Medications</label>
+                            <input type="text" id="reg-medications" placeholder="e.g. Metformin 500mg, None" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Past Medical Chronic Illnesses (Check applicable)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-semibold">
+                                <input type="checkbox" name="reg-past-illness" value="Hypertension" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                <span>Hypertension</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-semibold">
+                                <input type="checkbox" name="reg-past-illness" value="Diabetes" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                <span>Diabetes</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-semibold">
+                                <input type="checkbox" name="reg-past-illness" value="Asthma" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                <span>Asthma / COPD</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-semibold">
+                                <input type="checkbox" name="reg-past-illness" value="Kidney Disease" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                <span>Kidney Disease</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-semibold">
+                                <input type="checkbox" name="reg-past-illness" value="Heart Attack" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                <span>Cardiac Disease</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-all text-xs font-semibold">
+                                <input type="checkbox" name="reg-past-illness" value="Thyroid Disorder" class="h-4 w-4 rounded border-slate-300 text-clinical-600 focus:ring-clinical-500">
+                                <span>Thyroid Disorder</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Emergency Contact Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="reg-em-name" required placeholder="e.g. Thomas Vance" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Emergency Phone <span class="text-red-500">*</span></label>
+                        <input type="tel" id="reg-em-phone" required placeholder="+1 (555) 902-1800" class="w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:outline-none focus:ring-2 focus:ring-clinical-600 transition-all text-sm font-medium">
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end space-x-3 rounded-b-xl">
+                    <button type="button" onclick="closeRegisterModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-all">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-clinical-600 hover:bg-clinical-700 text-white font-bold rounded-xl text-xs shadow-md transition-all">Save Registered Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- OVERLAY MODAL: BEAUTIFUL E-PRESCRIPTION VIEW & PRINT VIEW -->
+    <div id="rx-modal-overlay" class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <span class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-prescription-bottle-medical text-clinical-600"></i>
+                    <span>Electronic Medical Prescription (Rx)</span>
+                </span>
+                <button onclick="closePrescriptionModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Medical Document Content -->
+            <div class="flex-grow overflow-y-auto p-6 bg-white" id="print-rx-modal">
+                <!-- Standardized Medical Letterhead -->
+                <div class="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-start">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">CONsulTayo SPCF Center Inc.</h2>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Telehealth Services Department</p>
+                        <p class="text-[10px] text-slate-400 font-medium">102 Medical Parkways • clinical-care@spcf.edu.ph</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Official Rx Voucher</span>
+                        <span id="modal-rx-id" class="text-xs font-extrabold text-clinical-600">#RX-20419A</span>
+                    </div>
+                </div>
+
+                <!-- Doctor Credentials Header -->
+                <div class="mb-6 grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Consulting Medical Doctor</p>
+                        <p id="modal-doc-name" class="font-bold text-slate-900 text-sm">Dr. Helena Santos, MD</p>
+                        <p class="text-slate-500">Board-Certified Clinical Specialist</p>
+                        <p class="text-slate-500">License No: LIC-9048-A9</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Date Authorized</p>
+                        <p id="modal-pres-date" class="font-bold text-slate-900">May 26, 2026</p>
+                    </div>
+                </div>
+
+                <!-- Patient Demographics Section in Document -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 grid grid-cols-2 sm:grid-cols-3 gap-y-2 gap-x-4 text-xs">
+                    <div class="sm:col-span-2">
+                        <span class="text-slate-400 font-bold">Patient Name:</span> <span id="modal-patient-name" class="font-extrabold text-slate-900">Johnathan Doe</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-bold">Sex / Age:</span> <span id="modal-patient-demog" class="font-bold text-slate-900">Male / 28y</span>
+                    </div>
+                    <div class="sm:col-span-3 border-t border-slate-200 pt-2 mt-1">
+                        <span class="text-slate-400 font-bold">Clinical Diagnosis:</span> <span id="modal-patient-diagnosis" class="font-bold text-slate-900 italic">Acute Bronchitis</span>
+                    </div>
+                </div>
+
+                <!-- Rx Emblem Symbol and Table of Drugs -->
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-center space-x-2 text-2xl font-black text-slate-950">
+                        <span>℞</span>
+                        <div class="h-0.5 bg-slate-900 flex-grow"></div>
+                    </div>
+                    
+                    <div class="divide-y divide-slate-100 text-sm" id="modal-rx-drugs-list">
+                        <!-- Medicine list generated here -->
+                    </div>
+                </div>
+
+                <!-- Physician Digital Stamp and Sign block -->
+                <div class="flex justify-between items-end border-t border-slate-100 pt-6">
+                    <div class="text-left">
+                        <p class="text-[9px] text-slate-400 font-bold uppercase max-w-xs">Disclaimer: This e-prescription is mathematically signed and valid under medical telemetry codes.</p>
+                    </div>
+                    <div class="text-center w-48 border-t border-dashed border-slate-300 pt-2">
+                        <!-- Digital Sign Image or Block -->
+                        <div class="font-serif italic text-blue-800 text-sm leading-none" id="modal-sig-pad">Helena Santos, MD</div>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">Physician Signature</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end space-x-3 no-print">
+                <button onclick="closePrescriptionModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-all">Close Viewer</button>
+                <button onclick="window.print()" class="px-5 py-2 bg-clinical-600 hover:bg-clinical-700 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center space-x-1.5">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print Rx Voucher</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY MODAL FOR ASSESSMENT OVERVIEW (Clinical Summary Review Modal) -->
+    <div id="telemetry-modal-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <span class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-file-waveform text-clinical-600"></i>
+                    <span>SPCF Clinical Telemetry Summary</span>
+                </span>
+                <button onclick="closeTelemetryModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700" id="telemetry-modal-body">
+                <!-- Loaded dynamically -->
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                <button onclick="closeTelemetryModal()" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-all">Close Review</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER AREA -->
+     <div class="button-container">
+    <a href="ncp.html" class="ncp-button">NURSING CARE PLANS (NCP)</a>
+</div>
+
+<div class="button-container">
+    <a href="nurses.html" class="nurses-button">Our Nurses</a>
+</div>
+
+<footer>
+    </footer>
+
+<footer>
+    </footer>
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 gap-4">
+            <div>
+                <p>&copy; 2026 CONsulTayo SPCF Inc. All Rights Reserved. College of Nursing.</p>
+            </div>
+            <div class="flex space-x-4">
+                <span class="hover:text-slate-600 cursor-pointer">Regulatory Code Compliance</span>
+                <span>•</span>
+                <span class="hover:text-slate-600 cursor-pointer">Academic Sandbox Model</span>
+            </div>
+        </div>
+
+    </footer>
+   
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // CLIENT STATE DATABASE (Persisted local storage)
+        let patients = [];
+        let appointments = [];
+        let activeWizardStep = 1;
+        let selectedWorkplaceBookingId = null;
+        let activePatientId = null; 
+        let isDoctorAuthenticated = false;
+
+        // PRE-REGISTERED 10 DETAILED PATIENTS
+        const initialMockPatients = [
+            {
+                id: "PAT-001",
+                name: "Johnathan Doe",
+                sex: "Male",
+                dob: "1998-08-14",
+                phone: "+1 (555) 304-9921",
+                email: "johnathan.doe@gmail.com",
+                emergencyName: "Sarah Doe",
+                emergencyPhone: "+1 (555) 304-9900",
+                allergies: "Penicillin, Pollen",
+                medications: "Lisinopril 10mg QD",
+                pastIllnesses: ["Hypertension"]
+            },
+            {
+                id: "PAT-002",
+                name: "Clarissa Harlowe",
+                sex: "Female",
+                dob: "1992-04-23",
+                phone: "+1 (555) 412-8822",
+                email: "clarissa.harlowe@outlook.com",
+                emergencyName: "Arthur Harlowe",
+                emergencyPhone: "+1 (555) 412-8800",
+                allergies: "Sulfa Drugs",
+                medications: "Acetaminophen 500mg (as needed)",
+                pastIllnesses: ["Thyroid Disorder"]
+            },
+            {
+                id: "PAT-003",
+                name: "Robert Chen",
+                sex: "Male",
+                dob: "1981-11-02",
+                phone: "+1 (555) 609-3234",
+                email: "robert.chen@yahoo.com",
+                emergencyName: "Mei Chen",
+                emergencyPhone: "+1 (555) 609-3200",
+                allergies: "None Stated",
+                medications: "Metformin 1000mg BID",
+                pastIllnesses: ["Diabetes", "Hypertension"]
+            },
+            {
+                id: "PAT-004",
+                name: "Sophia Martinez",
+                sex: "Female",
+                dob: "2017-06-15",
+                phone: "+1 (555) 781-0199",
+                email: "martinez.family@gmail.com",
+                emergencyName: "Carlos Martinez",
+                emergencyPhone: "+1 (555) 781-0100",
+                allergies: "Peanuts, Cashews",
+                medications: "Albuterol inhaler (as needed)",
+                pastIllnesses: ["Asthma"]
+            },
+            {
+                id: "PAT-005",
+                name: "Marcus Vance Jr.",
+                sex: "Male",
+                dob: "2009-02-12",
+                phone: "+1 (555) 233-1288",
+                email: "marcus.vance@gmail.com",
+                emergencyName: "Marcus Vance Sr.",
+                emergencyPhone: "+1 (555) 233-1200",
+                allergies: "Dust Mites",
+                medications: "Montelukast 10mg daily",
+                pastIllnesses: ["Asthma"]
+            },
+            {
+                id: "PAT-006",
+                name: "Evelyn Sterling",
+                sex: "Female",
+                dob: "1958-09-30",
+                phone: "+1 (555) 890-4411",
+                email: "evelyn.sterling@sterlingholdings.com",
+                emergencyName: "George Sterling",
+                emergencyPhone: "+1 (555) 890-4400",
+                allergies: "NSAIDs (Aspirin/Ibuprofen)",
+                medications: "Amlodipine 5mg QD, Atorvastatin 20mg",
+                pastIllnesses: ["Hypertension", "Kidney Disease"]
+            },
+            {
+                id: "PAT-007",
+                name: "David Kim",
+                sex: "Male",
+                dob: "1995-03-18",
+                phone: "+1 (555) 103-9933",
+                email: "david.kim@techcorp.io",
+                emergencyName: "Hannah Kim",
+                emergencyPhone: "+1 (555) 103-9900",
+                allergies: "Latex",
+                medications: "Hydrocortisone cream 1% (PRN)",
+                pastIllnesses: []
+            },
+            {
+                id: "PAT-008",
+                name: "Amara Okafor",
+                sex: "Female",
+                dob: "2002-10-25",
+                phone: "+1 (555) 304-4567",
+                email: "amara.okafor@state.edu",
+                emergencyName: "Ngozi Okafor",
+                emergencyPhone: "+1 (555) 304-4500",
+                allergies: "None Stated",
+                medications: "None",
+                pastIllnesses: []
+            },
+            {
+                id: "PAT-009",
+                name: "Liam O'Connor",
+                sex: "Male",
+                dob: "1974-12-05",
+                phone: "+1 (555) 601-2299",
+                email: "liam.oconnor@construction.org",
+                emergencyName: "Fiona O'Connor",
+                emergencyPhone: "+1 (555) 601-2200",
+                allergies: "Aspirin",
+                medications: "Simvastatin 10mg QD",
+                pastIllnesses: ["Hypertension"]
+            },
+            {
+                id: "PAT-010",
+                name: "Isabella Rossi",
+                sex: "Female",
+                dob: "1985-07-08",
+                phone: "+1 (555) 901-7722",
+                email: "isabella.rossi@milanodesign.it",
+                emergencyName: "Luigi Rossi",
+                emergencyPhone: "+1 (555) 901-7700",
+                allergies: "Soy, Dairy",
+                medications: "Levothyroxine 75mcg QD",
+                pastIllnesses: ["Thyroid Disorder"]
+            }
+        ];
+
+        // PREloaded appointments corresponding to those patients
+        const initialMockAppointments = [
+            {
+                id: "APT-88204",
+                patientId: "PAT-001",
+                specialty: "General Medicine",
+                doctor: "Dr. Helena Santos, MD",
+                date: "2026-05-26",
+                time: "09:00 AM - 09:30 AM",
+                name: "Johnathan Doe",
+                sex: "Male",
+                dob: "1998-08-14",
+                phone: "+1 (555) 304-9921",
+                email: "johnathan.doe@gmail.com",
+                emergencyName: "Sarah Doe",
+                emergencyPhone: "+1 (555) 304-9900",
+                hpi: "Patient reported dry cough over past 3 days accompanied by moderate headaches and myalgia.",
+                pastIllnesses: ["Hypertension"],
+                allergies: "Penicillin, Pollen",
+                medications: "Lisinopril 10mg QD",
+                symptoms: ["Dry Cough", "Headache", "Fatigue"],
+                severity: "4",
+                duration: "1 to 3 Days",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-90812-A",
+                    diagnosis: "Acute viral bronchitis without respiratory distress",
+                    medications: [
+                        { name: "Levosalbutamol Inhaler", freq: "2 puffs Q6H PRN", dur: "7 Days" },
+                        { name: "Paracetamol 500mg", freq: "1 tablet Q4H PRN for headache", dur: "3 Days" }
+                    ],
+                    doctor: "Dr. Helena Santos, MD",
+                    signature: "Dr. Helena Santos, MD",
+                    date: "May 26, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-11094",
+                patientId: "PAT-002",
+                specialty: "Neurology",
+                doctor: "Dr. Mateo Lim, MD",
+                date: "2026-05-25",
+                time: "02:00 PM - 02:30 PM",
+                name: "Clarissa Harlowe",
+                sex: "Female",
+                dob: "1992-04-23",
+                phone: "+1 (555) 412-8822",
+                email: "clarissa.harlowe@outlook.com",
+                emergencyName: "Arthur Harlowe",
+                emergencyPhone: "+1 (555) 412-8800",
+                hpi: "Complaining of severe throbbing pain on the left hemisphere of the head preceded by visual flashing aura.",
+                pastIllnesses: ["Thyroid Disorder"],
+                allergies: "Sulfa Drugs",
+                medications: "Acetaminophen 500mg PRN",
+                symptoms: ["Headache", "Nausea"],
+                severity: "8",
+                duration: "Less than 24 Hours",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-41223-B",
+                    diagnosis: "Severe Migraine with Aura episode",
+                    medications: [
+                        { name: "Sumatriptan 50mg", freq: "1 tablet at onset of headache; may repeat in 2 hours if needed", dur: "5 doses max" },
+                        { name: "Metoclopramide 10mg", freq: "1 tablet Q8H PRN for severe nausea", dur: "3 Days" }
+                    ],
+                    doctor: "Dr. Mateo Lim, MD",
+                    signature: "Dr. Mateo Lim, MD",
+                    date: "May 25, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-55610",
+                patientId: "PAT-003",
+                specialty: "Cardiology",
+                doctor: "Dr. Mateo Lim, MD",
+                date: "2026-05-24",
+                time: "10:30 AM - 11:00 AM",
+                name: "Robert Chen",
+                sex: "Male",
+                dob: "1981-11-02",
+                phone: "+1 (555) 609-3234",
+                email: "robert.chen@yahoo.com",
+                emergencyName: "Mei Chen",
+                emergencyPhone: "+1 (555) 609-3200",
+                allergies: "None Stated",
+                medications: "Metformin 1000mg BID",
+                symptoms: ["Fatigue"],
+                severity: "2",
+                duration: "More than 2 Weeks",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-77810-C",
+                    diagnosis: "Type 2 Diabetes Mellitus & Hypertension maintenance",
+                    medications: [
+                        { name: "Metformin XR 1000mg", freq: "1 tablet daily with dinner", dur: "90 Days" },
+                        { name: "Lisinopril 10mg", freq: "1 tablet QD in the morning", dur: "90 Days" }
+                    ],
+                    doctor: "Dr. Mateo Lim, MD",
+                    signature: "Dr. Mateo Lim, MD",
+                    date: "May 24, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-44210",
+                patientId: "PAT-004",
+                specialty: "Pediatrics",
+                doctor: "Dr. Alicia Cruz, MD",
+                date: "2026-05-23",
+                time: "03:30 PM - 04:00 PM",
+                name: "Sophia Martinez",
+                sex: "Female",
+                dob: "2017-06-15",
+                phone: "+1 (555) 781-0199",
+                email: "martinez.family@gmail.com",
+                emergencyName: "Carlos Martinez",
+                emergencyPhone: "+1 (555) 781-0100",
+                hpi: "Child experiencing high fever and difficulty swallowing due to severe tonsil redness for 2 days.",
+                pastIllnesses: ["Asthma"],
+                allergies: "Peanuts, Cashews",
+                medications: "Albuterol inhaler PRN",
+                symptoms: ["Fever", "Sore Throat", "Fatigue"],
+                severity: "7",
+                duration: "1 to 3 Days",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-11902-D",
+                    diagnosis: "Acute Streptococcal Tonsillitis",
+                    medications: [
+                        { name: "Amoxicillin Oral Suspension 250mg/5mL", freq: "5mL twice daily for bacterial coverage", dur: "10 Days" },
+                        { name: "Paracetamol Suspension 120mg/5mL", freq: "7.5mL Q6H PRN for temperature > 38.5C", dur: "5 Days" }
+                    ],
+                    doctor: "Dr. Alicia Cruz, MD",
+                    signature: "Dr. Alicia Cruz, MD",
+                    date: "May 23, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-19028",
+                patientId: "PAT-005",
+                specialty: "Pulmonology",
+                doctor: "Dr. Marcus Vance, MD",
+                date: "2026-05-22",
+                time: "09:00 AM - 09:30 AM",
+                name: "Marcus Vance Jr.",
+                sex: "Male",
+                dob: "2009-02-12",
+                phone: "+1 (555) 233-1288",
+                email: "marcus.vance@gmail.com",
+                emergencyName: "Marcus Vance Sr.",
+                emergencyPhone: "+1 (555) 233-1200",
+                allergies: "Dust Mites",
+                medications: "Montelukast 10mg daily",
+                symptoms: ["Shortness of Breath", "Dry Cough"],
+                severity: "5",
+                duration: "1 to 3 Days",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-88910-E",
+                    diagnosis: "Mild Exertional Asthma Exacerbation",
+                    medications: [
+                        { name: "Fluticasone/Salmeterol 100/50 Inhaler", freq: "1 puff BID daily maintenance", dur: "30 Days" },
+                        { name: "Albuterol HFA Inhaler", freq: "2 puffs 15 minutes prior to rigorous exercise", dur: "PRN" }
+                    ],
+                    doctor: "Dr. Marcus Vance, MD",
+                    signature: "Dr. Marcus Vance, MD",
+                    date: "May 22, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-66511",
+                patientId: "PAT-006",
+                specialty: "Cardiology",
+                doctor: "Dr. Mateo Lim, MD",
+                date: "2026-05-21",
+                time: "05:00 PM - 05:30 PM",
+                name: "Evelyn Sterling",
+                sex: "Female",
+                dob: "1958-09-30",
+                phone: "+1 (555) 890-4411",
+                email: "evelyn.sterling@sterlingholdings.com",
+                emergencyName: "George Sterling",
+                emergencyPhone: "+1 (555) 890-4400",
+                allergies: "NSAIDs",
+                medications: "Amlodipine 5mg QD",
+                symptoms: ["Headache", "Fatigue"],
+                severity: "4",
+                duration: "4 to 7 Days",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-33421-F",
+                    diagnosis: "Uncontrolled Stage II Essential Hypertension",
+                    medications: [
+                        { name: "Amlodipine 10mg", freq: "Increase dosage: 1 tablet daily in the morning", dur: "90 Days" },
+                        { name: "Losartan Potasium 50mg", freq: "Add on therapy: 1 tablet daily at night", dur: "90 Days" }
+                    ],
+                    doctor: "Dr. Mateo Lim, MD",
+                    signature: "Dr. Mateo Lim, MD",
+                    date: "May 21, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-77210",
+                patientId: "PAT-007",
+                specialty: "Dermatology",
+                doctor: "Dr. Helena Santos, MD",
+                date: "2026-05-20",
+                time: "02:00 PM - 02:30 PM",
+                name: "David Kim",
+                sex: "Male",
+                dob: "1995-03-18",
+                phone: "+1 (555) 103-9933",
+                email: "david.kim@techcorp.io",
+                emergencyName: "Hannah Kim",
+                emergencyPhone: "+1 (555) 103-9900",
+                allergies: "Latex",
+                medications: "Hydrocortisone cream 1% (PRN)",
+                symptoms: ["Muscle Ache"],
+                severity: "6",
+                duration: "4 to 7 Days",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-44192-G",
+                    diagnosis: "Severe Atopic Dermatitis flare-up",
+                    medications: [
+                        { name: "Mometasone Furoate 0.1% Topical Cream", freq: "Apply thinly to affected areas twice daily", dur: "10 Days" },
+                        { name: "Desloratadine 5mg", freq: "1 tablet once daily for itch suppression", dur: "14 Days" }
+                    ],
+                    doctor: "Dr. Helena Santos, MD",
+                    signature: "Dr. Helena Santos, MD",
+                    date: "May 20, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-88220",
+                patientId: "PAT-008",
+                specialty: "General Medicine",
+                doctor: "Dr. Helena Santos, MD",
+                date: "2026-05-19",
+                time: "10:30 AM - 11:00 AM",
+                name: "Amara Okafor",
+                sex: "Female",
+                dob: "2002-10-25",
+                phone: "+1 (555) 304-4567",
+                email: "amara.okafor@state.edu",
+                emergencyName: "Ngozi Okafor",
+                emergencyPhone: "+1 (555) 304-4500",
+                allergies: "None Stated",
+                medications: "None",
+                symptoms: ["Fatigue"],
+                severity: "6",
+                duration: "Less than 24 Hours",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-55612-H",
+                    diagnosis: "Acute Uncomplicated Urinary Tract Infection (Cystitis)",
+                    medications: [
+                        { name: "Nitrofurantoin Monohydrate 100mg", freq: "1 capsule twice daily with meals", dur: "5 Days" },
+                        { name: "Phenazopyridine 200mg", freq: "1 tablet three times daily after meals", dur: "3 Days" }
+                    ],
+                    doctor: "Dr. Helena Santos, MD",
+                    signature: "Dr. Helena Santos, MD",
+                    date: "May 19, 2026"
+                },
+                faceToFace: null
+            },
+            {
+                id: "APT-99210",
+                patientId: "PAT-009",
+                specialty: "General Medicine",
+                doctor: "Dr. Helena Santos, MD",
+                date: "2026-05-27",
+                time: "10:30 AM - 11:00 AM",
+                name: "Liam O'Connor",
+                sex: "Male",
+                dob: "1974-12-05",
+                phone: "+1 (555) 601-2299",
+                email: "liam.oconnor@construction.org",
+                emergencyName: "Fiona O'Connor",
+                emergencyPhone: "+1 (555) 601-2200",
+                hpi: "Experiencing constant dull headache radiating from occipital base to forehead for 5 days. Worsened by work stress.",
+                pastIllnesses: ["Hypertension"],
+                allergies: "Aspirin",
+                medications: "Simvastatin 10mg QD",
+                symptoms: ["Headache", "Muscle Ache"],
+                severity: "5",
+                duration: "4 to 7 Days",
+                status: "Pending",
+                prescription: null,
+                faceToFace: null
+            },
+            {
+                id: "APT-22041",
+                patientId: "PAT-010",
+                specialty: "General Medicine",
+                doctor: "Dr. Helena Santos, MD",
+                date: "2026-05-18",
+                time: "02:00 PM - 02:30 PM",
+                name: "Isabella Rossi",
+                sex: "Female",
+                dob: "1985-07-08",
+                phone: "+1 (555) 901-7722",
+                email: "isabella.rossi@milanodesign.it",
+                emergencyName: "Luigi Rossi",
+                emergencyPhone: "+1 (555) 901-7700",
+                hpi: "Complaining of persistent lethargy, muscle weakness, dry skin, and mild throat pressure despite daily Levothyroxine dose.",
+                pastIllnesses: ["Thyroid Disorder"],
+                allergies: "Soy, Dairy",
+                medications: "Levothyroxine 75mcg QD",
+                symptoms: ["Fatigue", "Muscle Ache"],
+                severity: "5",
+                duration: "More than 2 Weeks",
+                status: "Prescribed",
+                prescription: {
+                    rxId: "RX-66023-I",
+                    diagnosis: "Subclinical Hypothyroidism secondary to inadequate replacement dose",
+                    medications: [
+                        { name: "Levothyroxine Sodium 100mcg", freq: "1 tablet daily 30 minutes before breakfast", dur: "90 Days" },
+                        { name: "Ferrous Sulfate 325mg (Elemental Iron 65mg)", freq: "1 tablet daily with food for mild anemia", dur: "30 Days" }
+                    ],
+                    doctor: "Dr. Helena Santos, MD",
+                    signature: "Dr. Helena Santos, MD",
+                    date: "May 18, 2026"
+                },
+                faceToFace: null
+            }
+        ];
+
+        window.onload = function () {
+            if (!localStorage.getItem('carepulse_patients')) {
+                localStorage.setItem('carepulse_patients', JSON.stringify(initialMockPatients));
+            }
+            if (!localStorage.getItem('carepulse_appointments')) {
+                localStorage.setItem('carepulse_appointments', JSON.stringify(initialMockAppointments));
+            }
+
+            // Sync Doctor login state
+            const loggedInStatus = localStorage.getItem('carepulse_doctor_logged_in') === 'true';
+            isDoctorAuthenticated = loggedInStatus;
+            updateNavigationDoctorState();
+
+            loadDataFromStorage();
+            navigateTo('landing');
+
+            // Limit date constraints
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('form-date').setAttribute('min', today);
+
+            // Hook follow-up toggle UI changes
+            document.getElementById('work-require-f2f').addEventListener('change', function(e) {
+                const f2fFields = document.getElementById('work-f2f-fields');
+                if (e.target.checked) {
+                    f2fFields.classList.remove('hidden');
+                } else {
+                    f2fFields.classList.add('hidden');
+                }
+            });
+        }
+
+        // Parse structures
+        function loadDataFromStorage() {
+            try {
+                patients = JSON.parse(localStorage.getItem('carepulse_patients')) || initialMockPatients;
+                appointments = JSON.parse(localStorage.getItem('carepulse_appointments')) || initialMockAppointments;
+            } catch (err) {
+                patients = initialMockPatients;
+                appointments = initialMockAppointments;
+            }
+
+            // Default to first patient as active profile if none set
+            if (!activePatientId && patients.length > 0) {
+                activePatientId = patients[0].id;
+            }
+
+            renderPatientProfiles();
+            renderPatientDashboard();
+            renderDoctorDashboard();
+            populateAutofillDropdowns();
+            updateDoctorBadge();
+        }
+
+        function navigateTo(pageId) {
+            const pages = ['page-landing', 'page-booking-wizard', 'page-patient-dashboard', 'page-doctor-dashboard'];
+            pages.forEach(p => {
+                document.getElementById(p).classList.add('hidden');
+                document.getElementById(p).classList.remove('block');
+            });
+
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                targetPage.classList.add('block');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('menu-icon');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                icon.className = "fa-solid fa-xmark text-xl";
+            } else {
+                menu.classList.add('hidden');
+                icon.className = "fa-solid fa-bars text-xl";
+            }
+        }
+
+        function showNotification(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl shadow-lg border text-xs font-semibold flex items-start space-x-3 pointer-events-auto bg-white transition-all transform translate-y-2 opacity-0 duration-300 max-w-sm`;
+            
+            let colorClasses = 'border-emerald-200 text-emerald-800 bg-emerald-50';
+            let icon = '<i class="fa-solid fa-circle-check text-emeraldCustom-500 text-sm"></i>';
+            if (type === 'error') {
+                colorClasses = 'border-rose-200 text-rose-800 bg-rose-50';
+                icon = '<i class="fa-solid fa-triangle-exclamation text-rose-500 text-sm"></i>';
+            } else if (type === 'info') {
+                colorClasses = 'border-clinical-200 text-clinical-800 bg-clinical-50';
+                icon = '<i class="fa-solid fa-circle-info text-clinical-600 text-sm"></i>';
+            }
+
+            toast.innerHTML = `
+                ${icon}
+                <div class="flex-grow">
+                    <p class="font-bold text-slate-900">${title}</p>
+                    <p class="text-slate-500 font-normal mt-0.5">${message}</p>
+                </div>
+            `;
+            
+            toast.className += ` ${colorClasses}`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // DOCTOR GATEWAY CONTROLLER
+        function handleDoctorPortalAccess() {
+            if (isDoctorAuthenticated) {
+                navigateTo('doctor-dashboard');
+                renderDoctorDashboard();
+            } else {
+                openDoctorLoginModal();
+            }
+        }
+
+        function openDoctorLoginModal() {
+            document.getElementById('doctor-login-modal').classList.remove('hidden');
+        }
+
+        function closeDoctorLoginModal() {
+            document.getElementById('doctor-login-modal').classList.add('hidden');
+        }
+
+        function attemptDoctorLogin() {
+            const userField = document.getElementById('login-username').value.trim();
+            const passField = document.getElementById('login-password').value;
+
+            // Simple sandbox matching credentials
+            if (userField === 'nurses@spcf.edu.ph' && passField === 'spcf2026') {
+                isDoctorAuthenticated = true;
+                localStorage.setItem('carepulse_doctor_logged_in', 'true');
+                
+                closeDoctorLoginModal();
+                updateNavigationDoctorState();
+                showNotification("Verification Successful", "Attending Practitioner Session Instantiated.", "success");
+                
+                navigateTo('doctor-dashboard');
+                renderDoctorDashboard();
+
+                // Reset forms
+                document.getElementById('login-username').value = '';
+                document.getElementById('login-password').value = '';
+            } else {
+                showNotification("Access Denied", "Incorrect username or passkey codes.", "error");
+            }
+        }
+
+        function logoutDoctor() {
+            isDoctorAuthenticated = false;
+            localStorage.setItem('carepulse_doctor_logged_in', 'false');
+            updateNavigationDoctorState();
+            closeWorkplace();
+            showNotification("Logged Out", "Practitioner session cleared from local sandbox.", "info");
+            navigateTo('landing');
+        }
+
+        function updateNavigationDoctorState() {
+            const logoutBtn = document.getElementById('doc-logout-btn');
+            if (isDoctorAuthenticated) {
+                logoutBtn.classList.remove('hidden');
+            } else {
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        // RENDER PATIENT CARDS DIRECTORY IN PORTAL
+        function renderPatientProfiles() {
+            const listContainer = document.getElementById('patient-profiles-list');
+            listContainer.innerHTML = '';
+
+            document.getElementById('total-patients-badge').textContent = `${patients.length} Profiles Registered`;
+
+            patients.forEach(pat => {
+                const initials = pat.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const isActive = pat.id === activePatientId;
+                
+                const cardHtml = `
+                    <button onclick="setActivePatient('${pat.id}')" class="flex-shrink-0 flex items-center space-x-3 px-4 py-2.5 rounded-xl border transition-all text-left ${isActive ? 'bg-clinical-600 border-clinical-600 text-white shadow-md shadow-clinical-200' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'}">
+                        <div class="w-8 h-8 rounded-lg font-bold text-xs flex items-center justify-center ${isActive ? 'bg-white/20 text-white' : 'bg-clinical-100 text-clinical-700'}">
+                            ${initials}
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold leading-none">${pat.name}</p>
+                            <span class="text-[9px] opacity-75 block mt-0.5">${pat.sex} • DOB: ${pat.dob}</span>
+                        </div>
+                    </button>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        function setActivePatient(patId) {
+            activePatientId = patId;
+            renderPatientProfiles();
+            renderPatientDashboard();
+            showNotification("Profile Swapped", `Reviewing clinical files for ${patients.find(p => p.id === patId).name}`, "info");
+        }
+
+        // OPEN / CLOSE REGISTRATION MODAL
+        function openRegisterModal() {
+            document.getElementById('register-modal').classList.remove('hidden');
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('register-modal').classList.add('hidden');
+        }
+
+        // SAVE CUSTOM PATIENT CREATED BY USER
+        function saveRegisteredPatient(e) {
+            e.preventDefault();
+
+            // Extract Checkboxed Ills
+            const pmhChecked = Array.from(document.querySelectorAll('input[name="reg-past-illness"]:checked')).map(el => el.value);
+
+            const newId = "PAT-" + String(patients.length + 1).padStart(3, '0');
+            const newPatient = {
+                id: newId,
+                name: document.getElementById('reg-name').value,
+                sex: document.getElementById('reg-sex').value,
+                dob: document.getElementById('reg-dob').value,
+                phone: document.getElementById('reg-phone').value,
+                email: document.getElementById('reg-email').value,
+                allergies: document.getElementById('reg-allergies').value,
+                medications: document.getElementById('reg-medications').value || "None Stated",
+                pastIllnesses: pmhChecked,
+                emergencyName: document.getElementById('reg-em-name').value,
+                emergencyPhone: document.getElementById('reg-em-phone').value
+            };
+
+            patients.push(newPatient);
+            localStorage.setItem('carepulse_patients', JSON.stringify(patients));
+
+            // Set the newly registered profile active
+            activePatientId = newId;
+
+            loadDataFromStorage();
+            closeRegisterModal();
+            document.getElementById('patient-registration-form').reset();
+            
+            showNotification("Profile Registered!", `${newPatient.name} added successfully to the SPCF local database.`, "success");
+        }
+
+        // RENDER ACTIVE PATIENT DASHBOARD DATA
+        function renderPatientDashboard() {
+            const pat = patients.find(p => p.id === activePatientId);
+            if (!pat) return;
+
+            // Update Demographics Card
+            document.getElementById('dash-patient-name').textContent = pat.name;
+            document.getElementById('dash-patient-sex').textContent = pat.sex;
+            document.getElementById('dash-patient-dob').textContent = pat.dob;
+            document.getElementById('dash-patient-phone').textContent = pat.phone;
+            document.getElementById('dash-patient-email').textContent = pat.email;
+            document.getElementById('dash-patient-allergies').textContent = pat.allergies;
+            document.getElementById('dash-patient-meds').textContent = pat.medications;
+            
+            const initials = pat.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('patient-avatar-box').textContent = initials;
+
+            const pmhCont = document.getElementById('dash-patient-pmh-list');
+            pmhCont.innerHTML = '';
+            if (pat.pastIllnesses && pat.pastIllnesses.length > 0) {
+                pat.pastIllnesses.forEach(ill => {
+                    pmhCont.insertAdjacentHTML('beforeend', `<span class="bg-clinical-50 text-clinical-700 border border-clinical-100 font-bold px-2 py-0.5 rounded text-[10px]">${ill}</span>`);
+                });
+            } else {
+                pmhCont.insertAdjacentHTML('beforeend', `<span class="text-slate-400 italic text-[10px]">No historical chronicle records</span>`);
+            }
+
+            document.getElementById('dash-patient-em-name').textContent = pat.emergencyName;
+            document.getElementById('dash-patient-em-phone').textContent = pat.emergencyPhone;
+
+            // Render consultations associated with this active patient
+            const consultContainer = document.getElementById('consultation-list-container');
+            consultContainer.innerHTML = '';
+
+            const patAppointments = appointments.filter(a => a.patientId === activePatientId);
+            const pendingAppts = patAppointments.filter(a => a.status === 'Pending');
+            
+            document.getElementById('consult-counter').textContent = `${pendingAppts.length} Active`;
+
+            if (patAppointments.length === 0) {
+                consultContainer.innerHTML = `
+                    <div class="p-8 text-center text-slate-400 text-xs">
+                        No telemedicine consultation intakes found for this active patient. Click "Book Appointment" above to schedule!
+                    </div>
+                `;
+            } else {
+                patAppointments.forEach(appt => {
+                    const statusBadge = appt.status === 'Pending' 
+                        ? `<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center"><i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Waiting Nurse's Review</span>`
+                        : `<span class="bg-emerald-100 text-emeraldCustom-600 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center"><i class="fa-solid fa-circle-check mr-1.5"></i> Prescribed & Scheduled</span>`;
+
+                    const hpiSnippet = appt.hpi.length > 90 ? appt.hpi.substring(0, 90) + '...' : appt.hpi;
+
+                    const cardHtml = `
+                        <div class="p-5 hover:bg-slate-50 transition-all">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                                        <h4 class="font-extrabold text-sm text-slate-900">${appt.specialty} Intake Consultation</h4>
+                                        <span class="text-[10px] text-slate-400 font-mono">ID: ${appt.id}</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 mt-1">
+                                        <i class="fa-solid fa-user-doctor text-clinical-600 mr-1"></i> ${appt.doctor} • 
+                                        <i class="fa-solid fa-calendar mr-1"></i> ${appt.date} (${appt.time})
+                                    </p>
+                                    <p class="text-xs text-slate-600 bg-slate-50 border border-slate-100 p-2.5 rounded-lg italic mt-3 max-w-2xl">
+                                        <strong class="text-slate-700 not-italic">Chief Complaint (HPI):</strong> "${hpiSnippet}"
+                                    </p>
+                                </div>
+                                <div class="flex flex-col items-end gap-2 shrink-0 w-full sm:w-auto">
+                                    ${statusBadge}
+                                    <button onclick="displayIntakeSummary('${appt.id}')" class="text-xs text-clinical-600 hover:text-clinical-700 font-bold flex items-center space-x-1 mt-1">
+                                        <i class="fa-solid fa-file-invoice"></i>
+                                        <span>Audit intake sheet</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    consultContainer.insertAdjacentHTML('beforeend', cardHtml);
+                });
+            }
+
+            // Render Face-to-Face Followup if scheduled by doctor
+            const f2fCard = document.getElementById('f2f-followup-card');
+            const f2fBody = document.getElementById('f2f-details-body');
+            
+            // Check if any of patient's prescribed appointments have active faceToFace values
+            const activeF2FAppointment = patAppointments.find(a => a.status === 'Prescribed' && a.faceToFace);
+            if (activeF2FAppointment) {
+                f2fCard.classList.remove('hidden');
+                const f2f = activeF2FAppointment.faceToFace;
+                f2fBody.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[9px]">Follow-up Date</span>
+                            <span class="text-sm font-extrabold text-slate-900">${f2f.date}</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[9px]">Clinic / Department</span>
+                            <span class="text-sm font-extrabold text-slate-900">${f2f.room}</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <span class="text-slate-400 block font-bold uppercase tracking-wider text-[9px]">Attending Consultant</span>
+                            <span class="text-sm font-extrabold text-slate-900">${activeF2FAppointment.doctor}</span>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs flex items-start space-x-3 mt-2">
+                        <i class="fa-solid fa-circle-exclamation text-amber-600 text-sm mt-0.5"></i>
+                        <div>
+                            <span class="font-extrabold text-amber-900">Physician's Follow-up Directives:</span>
+                            <p class="text-amber-800 mt-1">${f2f.notes || 'No special preparations required.'}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                f2fCard.classList.add('hidden');
+            }
+
+            // Render Prescriptions associated with this active patient
+            const presContainer = document.getElementById('prescription-list-container');
+            presContainer.innerHTML = '';
+
+            const prescribedItems = patAppointments.filter(a => a.status === 'Prescribed' && a.prescription !== null);
+
+            if (prescribedItems.length === 0) {
+                presContainer.innerHTML = `
+                    <div class="p-8 text-center text-slate-400 text-xs">
+                        No digital e-prescriptions generated yet. Any pending bookings will appear in Doctor mode waiting for clinical approval.
+                    </div>
+                `;
+            } else {
+                prescribedItems.forEach(appt => {
+                    const rx = appt.prescription;
+                    const cardHtml = `
+                        <div class="p-5 hover:bg-slate-50 transition-all">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="p-3 bg-emerald-50 text-emeraldCustom-500 rounded-xl">
+                                        <i class="fa-solid fa-prescription-bottle-medical text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="font-extrabold text-sm text-slate-900">Rx Voucher: ${rx.rxId}</h4>
+                                            <span class="bg-clinical-50 text-clinical-700 text-[9px] font-bold px-1.5 py-0.5 rounded border border-clinical-100">Verified</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mt-1">Clinical Evaluation: <strong class="text-slate-700 font-semibold">${rx.diagnosis}</strong></p>
+                                        <p class="text-[11px] text-slate-400">Attending Physician: <strong class="text-slate-600 font-bold">${rx.doctor}</strong> authorized on ${rx.date}</p>
+                                    </div>
+                                </div>
+                                <div class="shrink-0 w-full sm:w-auto">
+                                    <button onclick="openPrescriptionModal('${appt.id}')" class="w-full bg-emeraldCustom-500 hover:bg-emeraldCustom-600 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm transition-all flex items-center justify-center space-x-1.5">
+                                        <i class="fa-solid fa-eye"></i>
+                                        <span>View / Print E-Prescription</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    presContainer.insertAdjacentHTML('beforeend', cardHtml);
+                });
+            }
+        }
+
+        // POPULATE THE AUTOFILL SELECTORS
+        function populateAutofillDropdowns() {
+            const autofillSelect = document.getElementById('autofill-profile-select');
+            autofillSelect.innerHTML = '<option value="">-- Choose Profile --</option>';
+
+            patients.forEach(pat => {
+                const opt = document.createElement('option');
+                opt.value = pat.id;
+                opt.textContent = pat.name;
+                autofillSelect.appendChild(opt);
+            });
+        }
+
+        // TRIGGER FORM AUTOFILL FROM PROFILE SELECTOR
+        function triggerWizardAutofill() {
+            const val = document.getElementById('autofill-profile-select').value;
+            if (!val) return;
+
+            const pat = patients.find(p => p.id === val);
+            if (!pat) return;
+
+            // Fill Demographics (Step 2)
+            document.getElementById('form-name').value = pat.name;
+            document.getElementById('form-sex').value = pat.sex;
+            document.getElementById('form-dob').value = pat.dob;
+            document.getElementById('form-phone').value = pat.phone;
+            document.getElementById('form-email').value = pat.email;
+            document.getElementById('form-emergency-name').value = pat.emergencyName;
+            document.getElementById('form-emergency-phone').value = pat.emergencyPhone;
+
+            // Fill History baseline (Step 3)
+            document.getElementById('form-allergies').value = pat.allergies;
+            document.getElementById('form-medications').value = pat.medications;
+
+            // Tick past chronic illness checkboxes
+            const pmhCheckboxes = document.querySelectorAll('input[name="past-illness"]');
+            pmhCheckboxes.forEach(cb => {
+                cb.checked = pat.pastIllnesses && pat.pastIllnesses.includes(cb.value);
+            });
+
+            showNotification("Autofill Complete", `${pat.name}'s demographics and illness history loaded into wizard.`, "info");
+        }
+
+        // WIZARD WIDGET METHODS
+        function updateSeverityScale(val) {
+            const disp = document.getElementById('severity-display');
+            let tier = "Mild";
+            if (val > 4 && val < 8) {
+                tier = "Moderate";
+                disp.className = "bg-amber-100 text-amber-800 text-xs font-extrabold px-3 py-1 rounded-full border border-amber-200";
+            } else if (val >= 8) {
+                tier = "Severe / Acute";
+                disp.className = "bg-rose-100 text-rose-800 text-xs font-extrabold px-3 py-1 rounded-full border border-rose-200";
+            } else {
+                disp.className = "bg-sky-100 text-sky-800 text-xs font-extrabold px-3 py-1 rounded-full border border-sky-200";
+            }
+            disp.textContent = `Scale: ${val} / 10 (${tier})`;
+        }
+
+        function wizardStep(direction) {
+            if (direction === 1 && !validateCurrentStep()) {
+                showNotification("Incomplete Fields", "Please make sure all mandatory inputs marked with (*) are filled.", "error");
+                return;
+            }
+
+            activeWizardStep += direction;
+            if (activeWizardStep < 1) activeWizardStep = 1;
+            if (activeWizardStep > 4) activeWizardStep = 4;
+
+            renderWizardStep();
+        }
+
+        function validateCurrentStep() {
+            if (activeWizardStep === 1) {
+                return (
+                    document.getElementById('form-specialty').value !== "" &&
+                    document.getElementById('form-doctor').value !== "" &&
+                    document.getElementById('form-date').value !== "" &&
+                    document.getElementById('form-time').value !== ""
+                );
+            }
+            if (activeWizardStep === 2) {
+                return (
+                    document.getElementById('form-name').value.trim() !== "" &&
+                    document.getElementById('form-sex').value !== "" &&
+                    document.getElementById('form-dob').value !== "" &&
+                    document.getElementById('form-phone').value.trim() !== "" &&
+                    document.getElementById('form-email').value.trim() !== "" &&
+                    document.getElementById('form-emergency-name').value.trim() !== "" &&
+                    document.getElementById('form-emergency-phone').value.trim() !== ""
+                );
+            }
+            if (activeWizardStep === 3) {
+                return (
+                    document.getElementById('form-hpi').value.trim() !== "" &&
+                    document.getElementById('form-allergies').value.trim() !== ""
+                );
+            }
+            return true;
+        }
+
+        function renderWizardStep() {
+            const bar = document.getElementById('wizard-progress-bar');
+            const percent = ((activeWizardStep - 1) / 3) * 100;
+            bar.style.width = `${percent}%`;
+
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById(`step-content-${i}`);
+                const indicator = document.getElementById(`indicator-step${i}`);
+                
+                if (i === activeWizardStep) {
+                    el.classList.remove('hidden');
+                    indicator.className = "w-8 h-8 rounded-full bg-clinical-600 text-white flex items-center justify-center font-bold text-sm ring-4 ring-clinical-950 scale-110 transition-all duration-300";
+                } else if (i < activeWizardStep) {
+                    el.classList.add('hidden');
+                    indicator.className = "w-8 h-8 rounded-full bg-emeraldCustom-500 text-white flex items-center justify-center font-bold text-sm ring-4 ring-slate-900 transition-all duration-300";
+                    indicator.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else {
+                    el.classList.add('hidden');
+                    indicator.className = "w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm ring-4 ring-slate-900 transition-all duration-300";
+                    indicator.textContent = i;
+                }
+            }
+
+            const prevBtn = document.getElementById('prev-step-btn');
+            const nextBtn = document.getElementById('next-step-btn');
+            const submitBtn = document.getElementById('submit-step-btn');
+
+            if (activeWizardStep === 1) {
+                prevBtn.classList.add('invisible');
+            } else {
+                prevBtn.classList.remove('invisible');
+            }
+
+            if (activeWizardStep === 4) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+        }
+
+        // FORM SUBMISSION PROCESS
+        function handleFormSubmission(e) {
+            e.preventDefault();
+
+            const pmhChecked = Array.from(document.querySelectorAll('input[name="past-illness"]:checked')).map(el => el.value);
+            const symptomsChecked = Array.from(document.querySelectorAll('input[name="symptom-check"]:checked')).map(el => el.value);
+
+            let targetPatId = document.getElementById('autofill-profile-select').value;
+            if (!targetPatId) {
+                targetPatId = activePatientId; 
+            }
+
+            const newRecord = {
+                id: "APT-" + Math.floor(10000 + Math.random() * 90000),
+                patientId: targetPatId,
+                specialty: document.getElementById('form-specialty').value,
+                doctor: document.getElementById('form-doctor').value,
+                date: document.getElementById('form-date').value,
+                time: document.getElementById('form-time').value,
+                name: document.getElementById('form-name').value,
+                sex: document.getElementById('form-sex').value,
+                dob: document.getElementById('form-dob').value,
+                phone: document.getElementById('form-phone').value,
+                email: document.getElementById('form-email').value,
+                emergencyName: document.getElementById('form-emergency-name').value,
+                emergencyPhone: document.getElementById('form-emergency-phone').value,
+                hpi: document.getElementById('form-hpi').value,
+                pastIllnesses: pmhChecked,
+                allergies: document.getElementById('form-allergies').value,
+                medications: document.getElementById('form-medications').value || "None stated",
+                symptoms: symptomsChecked,
+                severity: document.getElementById('form-severity').value,
+                duration: document.getElementById('form-duration').value,
+                status: "Pending", // Set state as PENDING on submission
+                prescription: null,
+                faceToFace: null
+            };
+
+            appointments.unshift(newRecord);
+            localStorage.setItem('carepulse_appointments', JSON.stringify(appointments));
+
+            loadDataFromStorage();
+
+            document.getElementById('booking-intake-form').reset();
+            activeWizardStep = 1;
+            renderWizardStep();
+
+            showNotification("Consultation Booked!", "Your medical intake sheet was compiled with status: Pending. Log in as a Doctor to validate and issue a prescription.", "success");
+            navigateTo('patient-dashboard');
+        }
+
+        // REVEALS DETAILED DIAGNOSTIC SHEET (Custom overlay modal)
+        function displayIntakeSummary(apptId) {
+            const appt = appointments.find(a => a.id === apptId);
+            if (!appt) return;
+
+            const pmhStr = appt.pastIllnesses.length > 0 ? appt.pastIllnesses.join(', ') : "None Stated";
+            const symStr = appt.symptoms.length > 0 ? appt.symptoms.join(', ') : "None Selected";
+
+            const bodyContainer = document.getElementById('telemetry-modal-body');
+            bodyContainer.innerHTML = `
+                <div class="border-b border-slate-100 pb-3 mb-3">
+                    <p class="text-xs text-clinical-600 font-extrabold uppercase">Legal Profile & Referrals</p>
+                    <h3 class="font-extrabold text-base text-slate-900">${appt.name}</h3>
+                    <p class="text-[11px] text-slate-500 mt-1">
+                        Sex: <strong class="text-slate-700">${appt.sex}</strong> • 
+                        DOB: <strong class="text-slate-700">${appt.dob}</strong> • 
+                        ID: <strong class="text-slate-700">${appt.patientId || 'Unlinked'}</strong>
+                    </p>
+                    <p class="text-[11px] text-slate-500 font-mono">Status: <strong class="text-amber-600 uppercase">${appt.status}</strong></p>
+                    <p class="text-[11px] text-slate-500">Contact: ${appt.phone} | ${appt.email}</p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl space-y-2">
+                    <p class="text-[10px] text-clinical-600 font-bold uppercase tracking-wider">Appointment parameters</p>
+                    <p class="text-xs font-semibold text-slate-800">${appt.specialty} Intake Consultation</p>
+                    <p class="text-[11px] text-slate-500">Scheduled under: <strong class="text-slate-700">${appt.doctor}</strong></p>
+                    <p class="text-[11px] text-slate-500">Scheduled Date: <strong class="text-slate-700">${appt.date} (${appt.time})</strong></p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <p class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Chief Complaint (HPI)</p>
+                    <p class="text-xs italic bg-slate-50 border border-slate-200 p-3 rounded-xl">"${appt.hpi}"</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Chronological PMH</span>
+                        <p class="text-xs text-slate-800 font-semibold bg-slate-100 p-2 rounded-lg">${pmhStr}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Allergy Baseline</span>
+                        <p class="text-xs text-red-600 font-bold bg-red-50 border border-red-100 p-2 rounded-lg">${appt.allergies}</p>
+                    </div>
+                </div>
+
+                <div class="bg-sky-50 border border-sky-100 rounded-xl p-3 space-y-1.5">
+                    <span class="text-[10px] text-sky-800 font-bold uppercase tracking-wider">Reported Active Symptoms</span>
+                    <p class="text-xs text-slate-800 font-semibold">${symStr}</p>
+                    <div class="flex justify-between items-center text-xs pt-1.5 border-t border-sky-200/50">
+                        <span class="text-slate-500">Subjective Severity Index:</span>
+                        <span class="bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded text-[10px]">${appt.severity} / 10 (${appt.duration})</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-xs">
+                    <span class="text-slate-500">Emergency Contacts:</span>
+                    <span class="font-bold text-slate-800">${appt.emergencyName} (${appt.emergencyPhone})</span>
+                </div>
+            `;
+
+            document.getElementById('telemetry-modal-overlay').classList.remove('hidden');
+        }
+
+        function closeTelemetryModal() {
+            document.getElementById('telemetry-modal-overlay').classList.add('hidden');
+        }
+
+        // DOCTOR PORTAL RENDERS
+        function updateDoctorBadge() {
+            const pendingQueue = appointments.filter(a => a.status === 'Pending');
+            document.getElementById('nav-queue-count').textContent = pendingQueue.length;
+        }
+
+        function renderDoctorDashboard() {
+            const queueContainer = document.getElementById('doctor-queue-container');
+            queueContainer.innerHTML = '';
+
+            const pendingQueue = appointments.filter(a => a.status === 'Pending');
+            document.getElementById('doc-queue-badge').textContent = `${pendingQueue.length} Pending`;
+
+            if (pendingQueue.length === 0) {
+                queueContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center p-8 text-center text-slate-400 h-full space-y-3 bg-white">
+                        <i class="fa-solid fa-hospital-user text-4xl text-slate-300"></i>
+                        <p class="text-xs font-bold text-slate-700">The clinical queue is completely cleared.</p>
+                        <p class="text-[10px] text-slate-400 max-w-[200px]">Create or schedule new consultation bookings in the SPCF intake wizard to simulate Doctor reviews.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            pendingQueue.forEach(appt => {
+                const badgeColor = appt.severity >= 7 ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800';
+                
+                const cardHtml = `
+                    <div onclick="selectPatientForAssessment('${appt.id}')" class="p-4 hover:bg-slate-50 cursor-pointer transition-all border-l-4 border-transparent hover:border-clinical-600 flex justify-between items-center bg-white border-b border-slate-100">
+                        <div class="space-y-1">
+                            <h4 class="font-extrabold text-sm text-slate-900">${appt.name}</h4>
+                            <p class="text-[11px] text-slate-500">Dept: <strong class="text-slate-700">${appt.specialty}</strong> • Date: ${appt.date}</p>
+                            <p class="text-[10px] text-slate-400 italic font-medium truncate max-w-xs">"${appt.hpi}"</p>
+                        </div>
+                        <div class="flex flex-col items-end gap-1.5 shrink-0">
+                            <span class="text-[10px] ${badgeColor} font-bold px-2 py-0.5 rounded-full">Severity: ${appt.severity}/10</span>
+                            <span class="text-[9px] font-bold text-slate-400"><i class="fa-solid fa-clock"></i> ${appt.time.split(' ')[0]}</span>
+                        </div>
+                    </div>
+                `;
+                queueContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // SELECTING WAITING PATIENTS FOR Assessment
+        function selectPatientForAssessment(apptId) {
+            const appt = appointments.find(a => a.id === apptId);
+            if (!appt) return;
+
+            selectedWorkplaceBookingId = apptId;
+
+            document.getElementById('workplace-empty-state').classList.add('hidden');
+            document.getElementById('workplace-active-state').classList.remove('hidden');
+
+            document.getElementById('workplace-patient-name').textContent = appt.name;
+            document.getElementById('workplace-booking-date').textContent = `${appt.date} • ${appt.time}`;
+            document.getElementById('work-sex').textContent = appt.sex;
+            document.getElementById('work-dob').textContent = appt.dob;
+            document.getElementById('work-phone').textContent = appt.phone;
+            document.getElementById('work-email').textContent = appt.email;
+            document.getElementById('work-hpi').textContent = `"${appt.hpi}"`;
+
+            // PMH render
+            const pmhCont = document.getElementById('work-pmh');
+            pmhCont.innerHTML = '';
+            if (appt.pastIllnesses && appt.pastIllnesses.length > 0) {
+                appt.pastIllnesses.forEach(ill => {
+                    pmhCont.insertAdjacentHTML('beforeend', `<span class="bg-slate-200 text-slate-800 text-[10px] px-2 py-0.5 rounded-md font-bold">${ill}</span>`);
+                });
+            } else {
+                pmhCont.insertAdjacentHTML('beforeend', `<span class="text-slate-400 italic">No chronic baseline</span>`);
+            }
+
+            // Allergies
+            document.getElementById('work-allergies').textContent = `Allergies: ${appt.allergies}`;
+
+            // Symptom Badges
+            const symCont = document.getElementById('work-symptoms');
+            symCont.innerHTML = '';
+            if (appt.symptoms && appt.symptoms.length > 0) {
+                appt.symptoms.forEach(s => {
+                    symCont.insertAdjacentHTML('beforeend', `<span class="bg-sky-100 text-sky-800 text-[10px] px-2 py-0.5 rounded-md font-extrabold">${s}</span>`);
+                });
+            } else {
+                symCont.insertAdjacentHTML('beforeend', `<span class="text-slate-400 italic">No symptoms marked</span>`);
+            }
+
+            // Severity Display
+            const sevBadge = document.getElementById('work-severity-badge');
+            sevBadge.textContent = `${appt.severity} / 10 Pain Severity`;
+            if (appt.severity >= 7) {
+                sevBadge.className = "bg-rose-100 text-rose-800 font-extrabold px-2.5 py-0.5 rounded-full text-[10px]";
+            } else {
+                sevBadge.className = "bg-sky-100 text-sky-800 font-extrabold px-2.5 py-0.5 rounded-full text-[10px]";
+            }
+
+            // Doctor configuration
+            document.getElementById('pres-doc-name').value = appt.doctor;
+            document.getElementById('doctor-logged-in-name').textContent = appt.doctor;
+            
+            const styleSelector = document.getElementById('pres-signature-style');
+            if (appt.doctor.includes("Santos")) {
+                styleSelector.value = "H_SANTOS";
+            } else if (appt.doctor.includes("Lim")) {
+                styleSelector.value = "M_LIM";
+            } else if (appt.doctor.includes("Cruz")) {
+                styleSelector.value = "A_CRUZ";
+            } else {
+                styleSelector.value = "M_VANCE"; 
+            }
+
+            // Reset follow-up values
+            document.getElementById('work-require-f2f').checked = false;
+            document.getElementById('work-f2f-fields').classList.add('hidden');
+            document.getElementById('work-f2f-date').value = '';
+            document.getElementById('work-f2f-room').value = '';
+            document.getElementById('work-f2f-notes').value = '';
+
+            // Reset medicines row
+            document.getElementById('rx-medications-builder').innerHTML = `
+                <div class="grid grid-cols-12 gap-2 item-row">
+                    <input type="text" placeholder="Drug (e.g., Amoxicillin 500mg)" class="col-span-6 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-name">
+                    <input type="text" placeholder="Freq (e.g., Q8H)" class="col-span-3 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-freq">
+                    <input type="text" placeholder="Dur (e.g., 7 Days)" class="col-span-3 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-dur">
+                </div>
+            `;
+            document.getElementById('pres-diagnosis').value = '';
+        }
+
+        function addMedicationRow() {
+            const container = document.getElementById('rx-medications-builder');
+            const newRow = `
+                <div class="grid grid-cols-12 gap-2 item-row mt-2">
+                    <input type="text" placeholder="Drug name" class="col-span-6 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-name">
+                    <input type="text" placeholder="Frequency" class="col-span-3 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-freq">
+                    <input type="text" placeholder="Duration" class="col-span-3 rounded-lg border-slate-200 bg-slate-50 border p-2 text-xs focus:outline-none focus:ring-1 focus:ring-clinical-600 font-medium med-dur">
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', newRow);
+        }
+
+        function closeWorkplace() {
+            document.getElementById('workplace-empty-state').classList.remove('hidden');
+            document.getElementById('workplace-active-state').classList.add('hidden');
+            selectedWorkplaceBookingId = null;
+        }
+
+        // FORMULATE AND SIGN RX VOUCHERS
+        function submitEPrescription() {
+            if (!selectedWorkplaceBookingId) return;
+
+            const diagnosisInput = document.getElementById('pres-diagnosis').value.trim();
+            if (diagnosisInput === '') {
+                showNotification("Diagnosis Missing", "You must formulate a clear physical diagnosis before signing off prescription assets.", "error");
+                return;
+            }
+
+            const medRows = document.querySelectorAll('#rx-medications-builder .item-row');
+            const prescriptionList = [];
+
+            medRows.forEach(row => {
+                const name = row.querySelector('.med-name').value.trim();
+                const freq = row.querySelector('.med-freq').value.trim();
+                const dur = row.querySelector('.med-dur').value.trim();
+
+                if (name !== '') {
+                    prescriptionList.push({
+                        name: name,
+                        freq: freq || "U.D. (As Directed)",
+                        dur: dur || "PRN"
+                    });
+                }
+            });
+
+            if (prescriptionList.length === 0) {
+                showNotification("Medicines Required", "Please specify at least one medication instruction for the prescription.", "error");
+                return;
+            }
+
+            // Build Face-to-Face Followup details if active
+            let f2fDetails = null;
+            if (document.getElementById('work-require-f2f').checked) {
+                const f2fDate = document.getElementById('work-f2f-date').value;
+                const f2fRoom = document.getElementById('work-f2f-room').value.trim() || "Main Consultation Wing";
+                const f2fNotes = document.getElementById('work-f2f-notes').value.trim();
+
+                if (!f2fDate) {
+                    showNotification("Follow-up Date Missing", "Please select a consultation date for the face-to-face follow-up.", "error");
+                    return;
+                }
+                f2fDetails = {
+                    date: f2fDate,
+                    room: f2fRoom,
+                    notes: f2fNotes
+                };
+            }
+
+            const targetApptIndex = appointments.findIndex(a => a.id === selectedWorkplaceBookingId);
+            if (targetApptIndex !== -1) {
+                const docName = document.getElementById('pres-doc-name').value;
+                const sigStyle = document.getElementById('pres-signature-style').value;
+                
+                let actualSigText = "Dr. Helena Santos, MD";
+                if (sigStyle === "M_LIM") actualSigText = "Dr. Mateo Lim, MD";
+                if (sigStyle === "A_CRUZ") actualSigText = "Dr. Alicia Cruz, MD";
+                if (sigStyle === "M_VANCE") actualSigText = "Dr. Marcus Vance, MD";
+
+                appointments[targetApptIndex].status = "Prescribed"; // Status updated to PRESCRIBED
+                appointments[targetApptIndex].faceToFace = f2fDetails; // Follow-up attached
+                appointments[targetApptIndex].prescription = {
+                    rxId: "RX-" + Math.floor(10000 + Math.random() * 90000) + "-V",
+                    diagnosis: diagnosisInput,
+                    medications: prescriptionList,
+                    doctor: docName,
+                    signature: actualSigText,
+                    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                };
+
+                localStorage.setItem('carepulse_appointments', JSON.stringify(appointments));
+                loadDataFromStorage();
+
+                showNotification("Signed and Completed!", "Intake sheet updated successfully. Prescription and Follow-up are now active.", "success");
+                
+                closeWorkplace();
+                navigateTo('patient-dashboard');
+            }
+        }
+
+        // RENDER PRINT MODAL VOUCHER
+        function openPrescriptionModal(apptId) {
+            const appt = appointments.find(a => a.id === apptId);
+            if (!appt || !appt.prescription) return;
+
+            const rx = appt.prescription;
+
+            document.getElementById('modal-rx-id').textContent = `#${rx.rxId}`;
+            document.getElementById('modal-doc-name').textContent = rx.doctor;
+            document.getElementById('modal-pres-date').textContent = rx.date;
+            document.getElementById('modal-patient-name').textContent = appt.name;
+            
+            let ageStr = "28y";
+            if (appt.dob) {
+                const birthYear = new Date(appt.dob).getFullYear();
+                const currentYear = new Date().getFullYear();
+                ageStr = `${currentYear - birthYear}y`;
+            }
+            document.getElementById('modal-patient-demog').textContent = `${appt.sex} / ${ageStr}`;
+            document.getElementById('modal-patient-diagnosis').textContent = rx.diagnosis;
+
+            const drugsListCont = document.getElementById('modal-rx-drugs-list');
+            drugsListCont.innerHTML = '';
+
+            rx.medications.forEach((med, idx) => {
+                const rowHtml = `
+                    <div class="py-3 flex justify-between items-start text-xs sm:text-sm">
+                        <div class="space-y-0.5">
+                            <span class="font-extrabold text-slate-900">${idx + 1}. ${med.name}</span>
+                            <span class="block text-[10px] text-slate-500 font-medium">Sig: Take ${med.freq}</span>
+                        </div>
+                        <span class="font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs">Disp: ${med.dur}</span>
+                    </div>
+                `;
+                drugsListCont.insertAdjacentHTML('beforeend', rowHtml);
+            });
+
+            const sigPad = document.getElementById('modal-sig-pad');
+            sigPad.textContent = rx.signature;
+
+            document.getElementById('rx-modal-overlay').classList.remove('hidden');
+        }
+
+        function closePrescriptionModal() {
+            document.getElementById('rx-modal-overlay').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

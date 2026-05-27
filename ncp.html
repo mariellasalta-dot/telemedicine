@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONsulTAYO SPCF INC. | NCP Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #020617; color: #f1f5f9; }
+        .ncp-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .ncp-table th, .ncp-table td { border: 1px solid #334155; padding: 12px; vertical-align: top; }
+        .ncp-table th { background: #1e293b; color: #94a3b8; text-transform: uppercase; font-size: 0.7rem; }
+        .form-section { @apply mb-6 p-4 bg-slate-950 border border-white/5 rounded-xl; }
+        .section-title { @apply text-blue-400 font-bold text-xs uppercase mb-4 block border-b border-white/5 pb-2; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <header class="max-w-7xl mx-auto flex justify-between items-center mb-10">
+        <h1 class="text-xl font-bold tracking-tighter text-white">CONsulTAYO <span class="text-blue-500">SPCF INC.</span></h1>
+        <div class="flex gap-4">
+            <button onclick="openCreateModal()" class="px-4 py-2 bg-blue-600 rounded-lg text-xs font-bold hover:bg-blue-500">CREATE NEW NCP</button>
+            <a href="index.html" class="px-4 py-2 bg-slate-800 rounded-lg text-xs hover:bg-slate-700">BACK TO HOME</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="patient-grid"></main>
+
+    <div id="modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl hidden z-50 p-6 overflow-y-auto">
+        <div class="max-w-6xl mx-auto bg-slate-900 border border-white/10 rounded-3xl p-8">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h2 id="modal-name" class="text-3xl font-bold text-white"></h2>
+                    <p id="modal-nurse" class="text-blue-400 font-bold italic mt-1"></p>
+                    <p id="modal-diag" class="text-slate-400 font-mono text-sm"></p>
+                </div>
+                <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-slate-400 px-4 py-2 bg-white/5 rounded-lg">CLOSE</button>
+            </div>
+            <div id="ncp-detail" class="overflow-x-auto"></div>
+        </div>
+    </div>
+
+    <div id="create-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl hidden z-50 p-6 overflow-y-auto">
+        <div class="max-w-4xl mx-auto bg-slate-900 border border-white/10 rounded-3xl p-8">
+            <h2 class="text-2xl font-bold mb-6 text-white text-center">Add New Nursing Care Plan</h2>
+            <form id="ncp-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="form-section col-span-2 md:col-span-1">
+                    <span class="section-title">Patient Information</span>
+                    <input type="text" id="pName" placeholder="Full Name" class="w-full p-3 mb-3 bg-slate-950 border border-white/10 rounded-lg text-sm" required>
+                    <input type="text" id="pDiag" placeholder="Nursing Diagnosis" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm" required>
+                </div>
+                <div class="form-section col-span-2 md:col-span-1">
+                    <span class="section-title">Assigned Nurse</span>
+                    <select id="pNurse" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm text-slate-300">
+                        <script>
+                            const nurses = ["Artezuela, Shanly", "Cayanan, Shaianne Jade", "Dizon, Francois Niko", "Garcia, Genesis", "Legaspi, Adrian", "Ocampo, Chlouie", "Salta, Mariella Dimple", "Sta Teresa, Aeira Lei", "Udeh, Ifunanya Esther"];
+                            document.write(nurses.map(n => `<option value="${n}">${n}</option>`).join(''));
+                        </script>
+                    </select>
+                </div>
+                <div class="form-section col-span-2">
+                    <span class="section-title">Clinical Details</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <textarea id="pAssess" placeholder="Assessment (Subj/Obj/Vitals)" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm h-24"></textarea>
+                        <textarea id="pSci" placeholder="Scientific Rationale" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm h-24"></textarea>
+                    </div>
+                </div>
+                <div class="form-section col-span-2">
+                    <span class="section-title">Planning & Interventions</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="pShort" placeholder="Short-Term Plan" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm">
+                        <input type="text" id="pLong" placeholder="Long-Term Plan" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <textarea id="pInt" placeholder="Interventions (Ind/Dep/Col)" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm h-20"></textarea>
+                        <textarea id="pRat" placeholder="Rationales" class="w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm h-20"></textarea>
+                    </div>
+                </div>
+                <input type="text" id="pOut" placeholder="Expected Outcome" class="col-span-2 w-full p-3 bg-slate-950 border border-white/10 rounded-lg text-sm">
+                
+                <div class="col-span-2 grid grid-cols-2 gap-4">
+                    <button type="button" onclick="document.getElementById('create-modal').classList.add('hidden')" class="py-4 bg-slate-700 rounded-xl font-bold text-white hover:bg-slate-600 transition-all">CANCEL</button>
+                    <button type="submit" class="py-4 bg-blue-600 rounded-xl font-bold text-white hover:bg-blue-500 transition-all">SAVE RECORD</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let patients = [
+            { id: 1, name: "Alice Johnson", nurse: "Artezuela, Shanly", diag: "Ineffective Airway Clearance", assess: "S: 'Difficulty breathing', O: Tachypnea, productive cough, O2 sat 92%. Vitals: HR 110, RR 28, Temp 38.5°C.", sciRat: "Accumulation of bronchial secretions obstructs airway, impairing gas exchange due to pulmonary inflammation.", planShort: "Patient will demonstrate improved airway patency within 4 hours.", planLong: "Patient will maintain clear breath sounds within 24 hours.", interventions: "Ind: Raise HOB to 45 deg, encourage fluids. Dep: Administer nebulized bronchodilator. Col: Consult respiratory therapist.", rat: "Ind: Gravity assists drainage. Dep: Decreases airway resistance. Col: Specialized airway management.", outcome: "Clear breath sounds and SpO2 > 95%." },
+            { id: 2, name: "Bob Smith", nurse: "Cayanan, Shaianne Jade", diag: "Hyperthermia", assess: "S: 'I feel hot'. O: Skin flushed, diaphoresis. Vitals: Temp 39.8°C, HR 105, BP 130/85.", sciRat: "Pyrogens stimulate the hypothalamus to reset the thermal set point, causing a febrile response.", planShort: "Body temperature will decrease to < 38°C in 2 hours.", planLong: "Patient will remain afebrile within 24 hours.", interventions: "Ind: Tepid sponge bath, promote rest. Dep: Administer Antipyretics (Paracetamol). Col: Blood culture collection.", rat: "Ind: Promotes evaporative cooling. Dep: Inhibits prostaglandin synthesis. Col: Identify causative pathogens.", outcome: "Temperature return to normal baseline." },
+            { id: 3, name: "Charlie Davis", nurse: "Dizon, Francois Niko", diag: "Acute Pain", assess: "S: 'Pain is 9/10'. O: Grimacing, guarding affected area. Vitals: HR 115, BP 150/95.", sciRat: "Nociceptors stimulated by tissue trauma trigger a pain cascade, activating the CNS.", planShort: "Pain scale will decrease to 4/10 within 1 hour.", planLong: "Pain will be managed or eliminated within 48 hours.", interventions: "Ind: Reposition for comfort. Dep: Administer IV Morphine. Col: Physical Therapy referral.", rat: "Ind: Decreases pressure on injury. Dep: Blocks pain signal conduction. Col: Non-pharmacological management.", outcome: "Verbal report of manageable pain." },
+            { id: 4, name: "Diana Prince", nurse: "Garcia, Genesis", diag: "Fluid Volume Deficit", assess: "S: 'Thirsty'. O: Poor skin turgor, dry mucous membranes, low urine output. Vitals: BP 90/60, HR 120.", sciRat: "Inadequate fluid intake or excessive loss leads to decreased circulatory blood volume.", planShort: "Urine output > 30ml/hr achieved within 4 hours.", planLong: "Electrolyte balance restored within 48 hours.", interventions: "Ind: Monitor I&O strictly. Dep: Initiate IV fluid bolus. Col: Laboratory monitoring of BUN/Creatinine.", rat: "Ind: Assesses hydration adequacy. Dep: Restores intravascular volume. Col: Evaluate renal function.", outcome: "Skin turgor restored and BP stable." },
+            { id: 5, name: "Edward Norton", nurse: "Legaspi, Adrian", diag: "Impaired Gas Exchange", assess: "S: 'Shortness of breath'. O: Cyanosis of nail beds, use of accessory muscles. Vitals: SpO2 88%, RR 32.", sciRat: "V/Q mismatch prevents efficient alveolar capillary diffusion of oxygen.", planShort: "O2 saturation will improve to > 92% in 30 minutes.", planLong: "Arterial blood gases return to normal limits.", interventions: "Ind: High Fowler's position. Dep: Oxygen therapy via NRB. Col: Pulse oximetry monitoring.", rat: "Ind: Maximize lung expansion. Dep: Increases alveolar oxygen partial pressure. Col: Continuous monitoring.", outcome: "Normal ABG values and O2 saturation." },
+            { id: 6, name: "Fiona Gallagher", nurse: "Ocampo, Chlouie", diag: "Activity Intolerance", assess: "S: 'I get tired easily'. O: Dyspnea upon minimal exertion. Vitals: HR spikes to 130 during activity.", sciRat: "Cardiac or pulmonary impairment restricts metabolic energy production.", planShort: "Patient will perform ADLs without severe fatigue within 24h.", planLong: "Patient will demonstrate increased exercise tolerance within 1 week.", interventions: "Ind: Cluster nursing care. Dep: Administer supplemental O2 during activity. Col: Cardiac rehab program.", rat: "Ind: Conserves energy reserves. Dep: Prevents hypoxemia. Col: Progressive mobility training.", outcome: "Increased activity participation." },
+            { id: 7, name: "George Miller", nurse: "Salta, Mariella Dimple", diag: "Imbalanced Nutrition", assess: "S: 'I have no appetite'. O: Recent weight loss (5kg), cachexia. Vitals: BMI 17.5.", sciRat: "Nutritional intake is insufficient to meet metabolic demands.", planShort: "Patient will ingest 50% of meals within 24 hours.", planLong: "Gradual weight gain of 1kg per week.", interventions: "Ind: Small frequent feedings. Dep: Nutritional supplement shakes. Col: Dietitian consultation.", rat: "Ind: Minimizes GI distress. Dep: Caloric density boost. Col: Tailored dietary plan.", outcome: "Stable weight and improved serum protein levels." },
+            { id: 8, name: "Hannah Abbott", nurse: "Sta Teresa, Aeira Lei", diag: "Risk for Infection", assess: "O: Surgical incision site shows serosanguinous drainage, redness. Vitals: Temp 37.8°C.", sciRat: "Invasive portal provides access for pathogenic colonization.", planShort: "Infection will be contained/prevented within 48 hours.", planLong: "Incision will heal without complication.", interventions: "Ind: Strict aseptic dressing change. Dep: Administer prophylactic antibiotics. Col: Wound care specialty consult.", rat: "Ind: Prevents exogenous contamination. Dep: Inhibits bacterial growth. Col: Advanced wound assessment.", outcome: "Incision site shows no signs of infection." },
+            { id: 9, name: "Ian Wright", nurse: "Udeh, Ifunanya Esther", diag: "Constipation", assess: "S: 'I feel bloated'. O: Abdominal distention, hard palpation, no stool for 3 days.", sciRat: "Slowed intestinal motility leads to hard, dry fecal matter.", planShort: "Passage of soft, formed stool within 24 hours.", planLong: "Establish regular elimination pattern.", interventions: "Ind: Increase fluid/fiber intake. Dep: Stool softener administration. Col: Digital rectal exam if needed.", rat: "Ind: Softens fecal mass. Dep: Improves evacuation. Col: Prevents impaction.", outcome: "Regular, painless bowel movements." },
+            { id: 10, name: "Julia Roberts", nurse: "Artezuela, Shanly", diag: "Sleep Pattern Disturbance", assess: "S: 'I cannot sleep at night'. O: Dark circles, irritability, frequent waking. Vitals: Stable but elevated BP.", sciRat: "Environmental and psychological stressors disrupt circadian rhythm.", planShort: "Patient will fall asleep within 30 minutes tonight.", planLong: "Consistent 7-8 hours of sleep achieved.", interventions: "Ind: Minimize noise/light. Dep: Administer mild sedative if ordered. Col: Consult for anxiety management.", rat: "Ind: Promotes sleep hygiene. Dep: Facilitates sleep induction. Col: Addresses psychosocial triggers.", outcome: "Patient reports feeling rested." }
+        ];
+
+        function renderPatients() {
+            document.getElementById('patient-grid').innerHTML = patients.map(p => `
+                <div class="bg-slate-900 p-6 rounded-2xl border border-white/5 cursor-pointer hover:border-blue-500/50" onclick="openNCP(${p.id})">
+                    <h3 class="font-bold text-white">${p.name}</h3>
+                    <p class="text-xs text-blue-500 font-mono">${p.diag}</p>
+                    <p class="text-[10px] text-slate-500 mt-4 italic">Assigned: ${p.nurse}</p>
+                </div>
+            `).join('');
+        }
+
+        function openNCP(id) {
+            const p = patients.find(i => i.id === id);
+            document.getElementById('modal-name').innerText = p.name;
+            document.getElementById('modal-nurse').innerText = "Assigned Nurse: " + p.nurse;
+            document.getElementById('modal-diag').innerText = p.diag;
+            document.getElementById('ncp-detail').innerHTML = `
+                <table class="ncp-table">
+                    <thead><tr><th>Assessment</th><th>Diagnosis</th><th>Sci. Rationale</th><th>Planning</th><th>Intervention</th><th>Rationale</th><th>Outcome</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>${p.assess}</td><td>${p.diag}</td><td>${p.sciRat}</td><td>ST: ${p.planShort}<br>LT: ${p.planLong}</td>
+                            <td>${p.interventions}</td><td>${p.rat}</td>
+                            <td class="font-bold text-emerald-400">${p.outcome}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function openCreateModal() { document.getElementById('create-modal').classList.remove('hidden'); }
+
+        document.getElementById('ncp-form').onsubmit = (e) => {
+            e.preventDefault();
+            patients.push({
+                id: patients.length + 1,
+                name: document.getElementById('pName').value,
+                diag: document.getElementById('pDiag').value,
+                nurse: document.getElementById('pNurse').value,
+                assess: document.getElementById('pAssess').value,
+                sciRat: document.getElementById('pSci').value,
+                planShort: document.getElementById('pShort').value,
+                planLong: document.getElementById('pLong').value,
+                interventions: document.getElementById('pInt').value,
+                rat: document.getElementById('pRat').value,
+                outcome: document.getElementById('pOut').value
+            });
+            renderPatients();
+            document.getElementById('create-modal').classList.add('hidden');
+            e.target.reset();
+        };
+
+        renderPatients();
+    </script>
+</body>
+</html>
